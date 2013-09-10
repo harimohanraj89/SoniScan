@@ -1,0 +1,17 @@
+; James Keary
+; Midi Instrument File
+; outic opcode controls panning information - ichan is channel number, inum is  controller # (in midi controller # 10 controls panning information), ivalue is set to p7 to be a # btwn 0 and 127, where 64 is dead center, 0 is hard left and 127 is hard right.
+; noteondur opcode sends 1 note on note off message per note
+
+#define MIDI(inno)	#
+instr $inno.
+
+idur = abs(p3)
+ipch table p4, p6							; midi pitches
+ivel table int(rnd(8)), giVelocities				; midi velocity
+; printf_i "%d is velocity of note:\n", 1, ivel
+outic p6, 10, p7, 0, 127		
+noteondur p6, ipch, ivel, idur
+
+endin
+#

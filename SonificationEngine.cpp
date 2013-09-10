@@ -454,14 +454,14 @@ void SonificationEngine::GenerateLines(char* fileLine, char* flagLine, char* com
         std::sprintf(localoutputfile,"%s",outputfile);
     }
     
-    std::sprintf(localFileLine, CSOUNDFILES_PATH "%s_out%d.txt", localoutputfile, output);
+    std::sprintf(localFileLine, OUTPUT_PATH "%s_out%d.txt", localoutputfile, output);
     if (output == 0)
     {
-        std::sprintf(localFlagLine, "-o" CSOUNDFILES_PATH "%s.wav", localoutputfile);
+        std::sprintf(localFlagLine, "-o" OUTPUT_PATH "%s.wav", localoutputfile);
         
     } else if (output == 1)
     {
-        std::sprintf(localFlagLine, " --midioutfile=" CSOUNDFILES_PATH "%s_sl%d_m%d_s%d.mid", dataFilename, slice, mode, scan);
+        std::sprintf(localFlagLine, " --midioutfile=" OUTPUT_PATH "%s_sl%d_m%d_s%d.mid", dataFilename, slice, mode, scan);
         
     } else
     {

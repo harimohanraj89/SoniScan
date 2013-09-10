@@ -1,0 +1,33 @@
+<CsoundSynthesizer>
+<CsOptions>
+-odac -t60 -g -d -m0
+</CsOptions>
+<CsInstruments>
+
+sr		=	44100
+kr		=	441
+ksmps	=	100
+nchnls	=	2
+0dbfs	=	1			; 0 decibel full-scale set to 1 for relative coding of amp values.
+
+#include \"../CsoundFiles/instruments/CELLO.txt\"
+#include \"../CsoundFiles/instruments/FRENCHHORN.txt\"
+#include \"../CsoundFiles/instruments/ORGAN.txt\"
+#include \"../CsoundFiles/instruments/XYLOPHONE.txt\"
+#include \"../CsoundFiles/f_tables/AChromatic.txt\"
+
+; -------------------------------------- INSTRUMENTS ----------------------------------------------
+$XYLOPHONE(1)
+$ORGAN(2)
+$CELLO(3)
+$CELLO(4)
+
+</CsInstruments>
+
+<CsScore>
+
+; -------------------------------- FUNCTION STATEMENTS -------------------------------------
+
+#include \"f_tables/table1.txt\"
+; NEED TO PUT A SPACE HERE OTHERWISE WON'T WORK!
+#include \"f_tables/table2.txt\"

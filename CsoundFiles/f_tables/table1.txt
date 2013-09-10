@@ -1,0 +1,4 @@
+; p1 funct	p2 loadtime p3 table size p4 GEN routine p5-pn parameters ...
+; GEN 10 computes sine wave, adds in phase harmonic partials, p5 - pn are partials
+; needed by xylophone, vibraphone
+f1	0	16384		10		1

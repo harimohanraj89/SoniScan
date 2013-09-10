@@ -37,10 +37,17 @@ typedef float sample;
 #define MAX_NUM_AMPERS   10
 
 // =======================
+// File paths
+// =======================
+#define CSOUND_PATH ""	//"/usr/local/bin/"    //  <---- Change this to the path where you have Csound installed. (usually "/usr/local/bin/")
+#define TEST_DATA_PATH "./DataFiles/"
+#define CSOUNDFILES_PATH "./CsoundFiles/"  //  <---- Change this to the path where you are storing your CSound files for this project
+#define OUTPUT_PATH "./Output/"
+// =======================
 // ControlBlock parameters
 // =======================
 
-#define TEST_DATA_PATH "/Users/harimohanraj/NYU/Sonification/DataFiles/"
+
 #define TEST_DATA_FILENAME_1 "test_a"
 #define TEST_DATA_FILENAME_2 "test_b"
 #define TEST_DATA_FILENAME_3 "test_c"
@@ -55,11 +62,11 @@ typedef float sample;
 #define NUM_MODES 3
 #define NUM_SCANS 3
 #define TEMPO 60.0
-#define CSOUND_PATH "/usr/local/bin/"    //  <---- Change this to the path where you have Csound installed. (usually "/usr/local/bin/")
-#define CSOUNDFILES_PATH "/Users/harimohanraj/NYU/Sonification/CsoundFiles/"  //  <---- Change this to the path where you are storing your CSound files for this project
+
+
+
 #define CSOUND_FLAGS "-g -d" // <---- Csound flags
-#define SCORE_FILENAME "soniscan_score"     // <---- This is the name of the temporary Csound file created during sonification. Don't really have to mess with it.
-#define MAX_ABSSCOREFILE 1024                       // ^-- Is it really?
+#define MAX_ABSSCOREFILE 1024
 #define MAX_SCORELINE_LENGTH 256
 #define MAX_NOTE_INDEX 36
 #define NUM_INSTR 4
@@ -67,3 +74,4 @@ typedef float sample;
 #define NUM_OUTPUTS 2
 
 #endif
+

@@ -1,0 +1,9 @@
+; PITCH TABLES OF Instrument Ranges
+; Cello range C2 to G5
+giFtCello ftgen 0, 0, -12, -2, 65.41, 82.41, 103.83, 123.47, 155.56, 196.00, 233.08, 293.66, 369.99, 440.00, 523.25, 659.29, 783.99
+; 4 octave Xylophone C4 - C8
+giFtIdiophone ftgen 0, 0, -12, -2, 261.63, 329.63, 415.30, 523.25, 659.26, 830.61, 1046.50, 1318.51, 1661.22, 2093.00, 2637.02, 3322.44, 4186.01 
+; French Horn range sounds G1 to F5
+giFtFrenchhorn ftgen 0, 0, -12, -2, 49.00, 61.74, 77.79, 98.00, 123.47, 155.56, 196.00, 246.94, 311.13, 392.00, 466.16, 587.33 
+; Organ Range C1 to C8 (no pedals, just manual, pipes '2 thru '16, normal range)
+giFtOrgan ftgen 0, 0, -12, -2, 32.70, 49.00, 73.42, 110.00, 164.81, 246.94, 369.99, 554.37, 830.61, 1244.51, 1864.66, 2793.83, 4186.01	

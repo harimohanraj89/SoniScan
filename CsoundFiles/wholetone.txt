@@ -1,0 +1,5 @@
+; Whole Tone 3 Octaves C2 to C5 (18 notes all together, 65.40 Hz to 493 Hz), index values should be
+
+isize = 18		; Hari, is this helpful?
+
+gimidinotes ftgen 0, 0, -isize, -2, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60,  62, 64, 66, 68, 70

@@ -1,0 +1,46 @@
+#define CELLO(inno)	#
+instr $inno.
+; additive synthesis cello
+idur    	=	p3
+iamp    	=	p6
+isine  ftgen  0,0,2^14,10,1
+
+ifqc table p4, giFtCello						; additive synth S = fc +- ifm1 +- kfm2 +- lfm3
+ifm1    	=	ifqc
+ifm2    	=	ifqc*3
+ifm3    	=	ifqc*4
+indx1   	=	7.5/log(ifqc)				;range from ca 2 to 1
+indx2   	=	15/sqrt(ifqc)				;range from ca 2.6 to .5
+indx3   	=	1.25/sqrt(ifqc)				;range from ca .2 to .038
+  
+ipan 		= 	p5
+irise   	= 	.2
+idec    	= 	.2
+inoisdur	= 	.1
+ivibdel 	=  	.75
+ivibwth 	= 	.03
+ivibrte 	= 	5.5
+
+kvib init 0
+timout 0,ivibdel,transient					; delay vibrato ivibdel sec
+kvbctl linen 1, .5, idur-ivibdel, .1			; vibrato control envelope
+krnd randi .0075, 2						; random deviation vib width
+kvib oscili kvbctl*ivibwth+krnd, ivibrte*kvbctl, isine	; generator
+
+transient:
+timout inoisdur, p3, continue  				; execute for .2 secs only
+ktrans linseg 1, inoisdur, 0, 1, 0      			; transient envelope
+anoise randi ktrans*iamp/4,.2*ifqc 			; attack noise...
+attack oscili anoise, 2000, isine				; ...centered around 2kHz
+
+continue:
+amod1 oscili ifm1*(indx1+ktrans), ifm1, isine
+amod2 oscili ifm2*(indx2+ktrans), ifm2, isine
+amod3 oscili ifm3*(indx3+ktrans), ifm3, isine
+aout oscili iamp, (ifqc+amod1+amod2+amod3)*(1+kvib), isine
+aout linen aout+attack, irise, idur, idec
+
+outs ((aout*ipan)/4.3496), ((aout*(1-ipan))/4.24255)	; if p6 is 1, these multipliers for max amp without clipping
+endin
+#
+

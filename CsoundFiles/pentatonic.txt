@@ -1,0 +1,5 @@
+; Major Pentatonic 3 Octaves C3 to C6 (15 notes all together, 130.81 Hz to 987.77Hz)
+
+isize = 15		; Hari, is this helpful?
+
+gimidinotes ftgen 0, 0, -isize, -2, 48, 50, 53, 55, 57, 60, 62, 65, 67, 69, 72, 74, 77, 79, 81
