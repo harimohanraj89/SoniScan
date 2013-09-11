@@ -61,6 +61,8 @@ int main(void)
     
     do
     {
+        system("clear");
+
         cout << "SONISCAN\n========\n\n";
         cout << "Current file   : " << charInput          << "\n";
         cout << "Current mode   : " << engine.GetMode()   << "\n";
