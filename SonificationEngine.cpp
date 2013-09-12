@@ -16,7 +16,6 @@ void SonificationEngine::SetDataFilename(char* argDataFilename)
     strcpy(dataFilename, argDataFilename);
 }
 
-
 int SonificationEngine::GetMode()
 {
     return mode;
@@ -403,39 +402,52 @@ void SonificationEngine::WriteHeader(std::ofstream &file)
     std::ifstream headerFile;
     std::string headerLine;
     
-    switch (output)
-    {
-        case 0: // CSOUND INSTR FILE HEADER
-            
-            headerFile.open(CSOUNDFILES_PATH "csd_instr_header.txt");
-            
-            while (headerFile.good())
-            {
-                getline(headerFile,headerLine);
-                file << headerLine << "\n";
-            }
-            
-            headerFile.close();
-            
-            break;
-            
-        case 1: // MIDI FILE HEADER
+    if (mode == 1) {
+        headerFile.open(CSOUNDFILES_PATH "scd_header.txt");
+        while (headerFile.good())
+        {
+            getline(headerFile,headerLine);
+            file << "\n" << headerLine;
+        }
+        
+        headerFile.close();
+    }
 
-            headerFile.open(CSOUNDFILES_PATH "csd_midi_header.txt");
-            
-            while (headerFile.good())
-            {
-                getline(headerFile,headerLine);
-                file << headerLine << "\n";
-            }
-            
-            headerFile.close();
-            
-            break;
-            
-        default:
-            std::cout << "Invalid output value!\n";
-            break;
+    else {
+        switch (output)
+        {
+            case 0: // CSOUND INSTR FILE HEADER
+                
+                headerFile.open(CSOUNDFILES_PATH "csd_instr_header.txt");
+                
+                while (headerFile.good())
+                {
+                    getline(headerFile,headerLine);
+                    file << headerLine << "\n";
+                }
+                
+                headerFile.close();
+                
+                break;
+                
+            case 1: // MIDI FILE HEADER
+
+                headerFile.open(CSOUNDFILES_PATH "csd_midi_header.txt");
+                
+                while (headerFile.good())
+                {
+                    getline(headerFile,headerLine);
+                    file << headerLine << "\n";
+                }
+                
+                headerFile.close();
+                
+                break;
+                
+            default:
+                std::cout << "Invalid output value!\n";
+                break;
+        }
     }
 }
 
@@ -514,15 +526,19 @@ void SonificationEngine::WriteFooter(std::ofstream &file)
     std::ifstream footerFile;
     std::string footerLine;
     
-            
-    footerFile.open(CSOUNDFILES_PATH "csd_footer.txt");
-            
+    if (mode == 1) {
+        footerFile.open(CSOUNDFILES_PATH "scd_footer.txt");
+    }
+    else {
+        footerFile.open(CSOUNDFILES_PATH "csd_footer.txt");
+    }
+
     while (footerFile.good())
     {
         getline(footerFile,footerLine);
         file << footerLine << "\n";
     }
-            
+                    
     footerFile.close();
 }
 
@@ -621,6 +637,57 @@ void SonificationEngine::ModeOneSonify()
     // -----------------------------
     UpdateSliceSize();
     
+    // -----------------------------------------------
+    // Divide selected rectangle into even grid spaces
+    // -----------------------------------------------
+    
+    float xRatio = float(sliceWidth)/float(NUM_BEATS);
+    float yRatio = float(sliceHeight)/float(NUM_INSTR);
+    
+    float averageArray[3];
+    int averageArrayInt[3];
+    // Iterate through each beat column
+    
+    
+    // Calculate x-boundaries of beat column
+    xStart = sliceWidthL;
+    xEnd = sliceWidthR;
+    
+    
+    // Iterate through each instrument in beat column
+    for (int instr=0; instr<3; instr++)
+    {
+        
+        // Calculate y-boundaries of instrument within beat column
+        yStart = int(sliceHeightD + instr*yRatio);
+        yEnd = int(sliceHeightD + (instr+1)*yRatio) - 1;
+        
+        
+        // Compute average of each grid-square
+        average = 0;
+        count = 0;
+        
+        
+        for (int x=xStart; x<=xEnd; x++)
+        {
+            for (int y=yStart; y<=yEnd; y++)
+            {
+                if (masterData[x][y][slice] != -1)
+                {
+                    average += masterData[x][y][slice];
+                    count++;
+                }
+            }
+        }
+        
+        
+        if (count > 0)
+        {
+            average /= count;
+        }
+        averageArray[instr]=average;
+    }
+
     // -----------------------------
     // Generate lines
     // -----------------------------
@@ -638,108 +705,30 @@ void SonificationEngine::ModeOneSonify()
     scoreFile.open(fileLine, std::ios::trunc);
     
     WriteHeader(scoreFile);
-    
-    // Repeat inclusion
-    // -------------------
-    if (scan == 0)
-    {
-        scoreFile << ";r 20\n";
-    } else
-    {
-        scoreFile << ";r 5\n";
-    }
-    
-    // -----------------------------------------------
-    // Divide selected rectangle into even grid spaces
-    // -----------------------------------------------
-    
-    float xRatio = float(sliceWidth)/float(NUM_BEATS);
-    float yRatio = float(sliceHeight)/float(NUM_INSTR);
-    
-    float averageArray[NUM_BEATS][NUM_INSTR];
-    // Iterate through each beat column
-    
-    for (int beat=0; beat<NUM_BEATS; beat++)
-    {
-        // Calculate x-boundaries of beat column
-        xStart = sliceWidthL + beat*xRatio;
-        xEnd = sliceWidthL + (beat+1)*xRatio - 1;
-        
-        
-        // Iterate through each instrument in beat column
-        for (int instr=0; instr<NUM_INSTR; instr++)
-        {
-            
-            // Calculate y-boundaries of instrument within beat column
-            yStart = int(sliceHeightD + instr*yRatio);
-            yEnd = int(sliceHeightD + (instr+1)*yRatio) - 1;
-            
-            
-            // Compute average of each grid-square
-            average = 0;
-            count = 0;
-            
-            
-            for (int x=xStart; x<=xEnd; x++)
-            {
-                for (int y=yStart; y<=yEnd; y++)
-                {
-                    if (masterData[x][y][slice] != -1)
-                    {
-                        average += masterData[x][y][slice];
-                        count++;
-                    }
-                }
-            }
-            
-            
-            if (count > 0)
-            {
-                average /= count;
-            }
-            
-            
-            UpdateScoreLine(beat, 0, average);
-            averageArray[beat][instr]=average;
-            switch (output)
-            {
-                case 0:
-                    std::sprintf(scoreLine, "i%d %f %f %d %f %d %f\n", instr+1, startTime, duration, noteIndex, amplitude, instr+1, panValue);
-                    scoreFile << scoreLine;
-                    break;
-                case 1:
-                    
-                    std::sprintf(scoreLine, "i%d %f %f %d %d %d %d\n", instr+1, startTime, duration, noteIndex, midiVelocity, instr+1, midiPan);
-                    scoreFile << scoreLine;
-                    break;
-                    
-                default:
-                    break;
-            }
-            
-            instrCount[instr]++;
+
+
+    for (int i=0; i<3; i++) {
+        averageArrayInt[i] = (int)(MODE_ONE_FREQ*(1 - DETUNE_FACTOR*(averageArray[1] - averageArray[i])/averageArray[1]));
+
+        if (i == 2) {
+            std::sprintf(scoreLine, "%d", averageArrayInt[i]);    
         }
+        else {
+            std::sprintf(scoreLine, "%d,", averageArrayInt[i]);    
+        }
+        scoreFile << scoreLine;    
     }
         
     // --------------------
     // Display all averages
     // --------------------
-//    for (int y=0; y<NUM_INSTR; y++)
-//    {
-//        for (int x=0; x<NUM_BEATS; x++)
-//        {
-//            std::cout << printf("%4.2f",10000 + averageArray[x][y]) << "\t";
-//        }
-//        std::cout << "\n\n";
-//    }
+    for (int y=0; y<3; y++)
+    {
+             std::cout << printf("AVERAGE %d : %d\n", y+1, averageArrayInt[y]);
+    }
     
     WriteFooter(scoreFile);
     scoreFile.close();
-    
-    // -------------------------
-    // Csound file execution
-    // -------------------------
-    system(commandLine);
     
     DisplayDiagnostics(fileLine, flagLine, commandLine, instrCount);
 

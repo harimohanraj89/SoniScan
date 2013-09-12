@@ -72,6 +72,8 @@ typedef float sample;
 #define NUM_INSTR 4
 #define NUM_BEATS 12
 #define NUM_OUTPUTS 2
+#define MODE_ONE_FREQ 440
+#define DETUNE_FACTOR 0.1
 
 #endif
 

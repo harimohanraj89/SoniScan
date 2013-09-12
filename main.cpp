@@ -61,7 +61,7 @@ int main(void)
     
     do
     {
-        system("clear");
+        // system("clear");
 
         cout << "SONISCAN\n========\n\n";
         cout << "Current file   : " << charInput          << "\n";
