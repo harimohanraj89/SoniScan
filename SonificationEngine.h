@@ -82,7 +82,10 @@ public:
     void SonifySelect();
     
     // Sonification utility functions
+    bool PointUpLine(int, int, int, int, int, int);
+    bool PointRightLine(int, int, int, int, int, int);
     int GetInstrNum(float);
+    int GetLobe(int, int);
     void UpdateSliceSize();
     void UpdateScoreLine(float,float,float);
     void WriteHeader(std::ofstream&);

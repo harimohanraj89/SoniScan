@@ -146,6 +146,13 @@ void SonificationEngine::SetMasterData(float*** argMasterData, int argMasterData
 // ==============================
 // SONIFICATION UTILITY FUNCTIONS
 // ==============================
+bool SonificationEngine::PointUpLine(int x, int y, int x1, int y1, int x2, int y2) {
+    return (y > y1 + (x-x1)*(y2-y1)/(x2-x1));
+}
+
+bool SonificationEngine::PointRightLine(int x, int y, int x1, int y1, int x2, int y2) {
+    return (x > x1 + (y-y1)*(x2-x1)/(y2-y1));   
+}
 
 int SonificationEngine::GetInstrNum(float argValue)
 {
@@ -159,6 +166,42 @@ int SonificationEngine::GetInstrNum(float argValue)
     return NUM_INSTR;
 }
 
+int SonificationEngine::GetLobe(int x, int y) {
+    if (std::abs(FPSLICE-slice) < std::abs(TOSLICE-slice)) {    // Frontal Parietal slice
+
+        // Frontal lobe
+        if (!PointUpLine(x,y,AX,AX,BX,BY) && !PointUpLine(x,y,BX,BY,HX,HY) && !PointUpLine(x,y,HX,HY,EX,EY)) {
+            return 1;
+        }
+
+        // Sensory Motor Cortex
+        if ( (PointUpLine(x,y,AX,AX,BX,BY) && !PointUpLine(x,y,DX,DY,CX,CY) && !PointRightLine(x,y,BX,BY,CX,CY) ) ||
+             (PointUpLine(x,y,HX,HY,EX,EY) && !PointUpLine(x,y,GX,GY,FX,FY) && PointRightLine(x,y,HX,HY,GX,GY) ) ) {
+            return 2;
+        }
+
+        // Parietal Lobe
+        if  (PointUpLine(x,y,DX,DX,CX,CY) || PointUpLine(x,y,CX,CY,GX,GY) || PointUpLine(x,y,GX,GY,FX,FY)) {
+            return 3;
+        }
+    }
+    else {  // Temporal Occipital slice
+
+        // Occipital Lobe
+        if (PointUpLine(x,y,IX,IY,JX,JY) && PointUpLine(x,y,LX,LY,MX,MY) && 
+            ! (!PointUpLine(x,y,JX,JY,KX,KY) && !PointUpLine(x,y,KX,KY,LX,LY)) ) {
+            return 5;
+        }
+
+        // Temporal Lobe
+        if ( ( !PointUpLine(x,y,IX,IY,JX,JY) && !PointRightLine(x,y,JX,JY,JX,JY+1) ) ||
+            (!PointUpLine(x,y,LX,LY,MX,MY) && PointRightLine(x,y,LX,LY,LX,LY+1)) ) {
+            return 4;
+        }
+    }
+
+    return 0;
+}
 
 void SonificationEngine::UpdateSliceSize()
 {

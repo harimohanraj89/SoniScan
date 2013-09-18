@@ -75,5 +75,51 @@ typedef float sample;
 #define MODE_ONE_FREQ 440
 #define DETUNE_FACTOR 0.1
 
+// =============================
+// Brain Lobes parameters
+// =============================
+
+#define FPSLICE 30
+#define TOSLICE 68
+
+#define AX 14
+#define AY 37
+
+#define BX 28
+#define BY 45
+
+#define CX 26
+#define CY 57
+
+#define DX 7
+#define DY 50
+
+#define EX 72
+#define EY 37
+
+#define FX 75
+#define FY 54
+
+#define GX 58
+#define GY 59
+
+#define HX 52
+#define HY 44
+
+#define IX 11
+#define IY 65
+
+#define JX 32
+#define JY 59
+
+#define KX 43
+#define KY 70
+
+#define LX 53
+#define LY 56
+
+#define MX 73
+#define MY 67
+
 #endif
 
