@@ -40,20 +40,11 @@ int main(void)
     control.SetEngine(&engine);
     char dataLine[MAX_SCORELINE_LENGTH];
     sprintf(dataLine,TEST_DATA_PATH TEST_DATA_FILENAME_1 ".txt");
-    control.ReadFile("st3pt");
+    control.ReadFile(TEST_DATA_FILENAME_1);
     
     // ================================
     // TESTING GROUNDS
     // ================================
-    cout << "Slice: ";
-    cin>>parameterInput;
-    engine.SetSlice(parameterInput);
-    for (int i=0; i<100; i++) {
-        for (int j=0; j<86; j++) {
-            std::cout << engine.GetLobe(j,i) << " ";
-        }
-        std::cout << "\n";
-    }
 
     // ================================
     // USER INTERFACE

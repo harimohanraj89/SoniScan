@@ -606,7 +606,7 @@ void SonificationEngine::SonifySelect()
                 std::cout << "Error. Current slice value is invalid. SonifySelect() call ignored.\n";
                 break;
             }
-            
+            std::cout << "In SonifySelect()\n";
             ModeOneSonify();
             break;
             
@@ -659,13 +659,7 @@ void SonificationEngine::SonifySelect()
 // =========================================================================
 
 void SonificationEngine::ModeOneSonify()
-{
-    // Parsing variables
-    int xStart;
-    int xEnd;
-    int yStart;
-    int yEnd;
-    
+{   
     float average;
     int count;
     int maxValue = pow(2,DATA_BITDEPTH) - 1;
@@ -679,7 +673,7 @@ void SonificationEngine::ModeOneSonify()
     // Update slice size variables
     // -----------------------------
     UpdateSliceSize();
-    
+    std::cout << "SLICE SIZE " << sliceWidth << "\t" << sliceHeight;
     // -----------------------------------------------
     // Divide selected rectangle into even grid spaces
     // -----------------------------------------------
@@ -688,48 +682,75 @@ void SonificationEngine::ModeOneSonify()
     float yRatio = float(sliceHeight)/float(NUM_INSTR);
     
     float averageArray[3];
+    int countArray [3];
     int averageArrayInt[3];
-    // Iterate through each beat column
+    int localInstr;
+
+    for (int i=0; i<3; i++) {
+        averageArray[i] = 0;
+        averageArrayInt[i]=0;
+        countArray[i] = 0;
+    }
     
-    
-    // Calculate x-boundaries of beat column
-    xStart = sliceWidthL;
-    xEnd = sliceWidthR;
-    
-    
-    // Iterate through each instrument in beat column
-    for (int instr=0; instr<3; instr++)
-    {
-        
-        // Calculate y-boundaries of instrument within beat column
-        yStart = int(sliceHeightD + instr*yRatio);
-        yEnd = int(sliceHeightD + (instr+1)*yRatio) - 1;
-        
-        
-        // Compute average of each grid-square
-        average = 0;
-        count = 0;
-        
-        
-        for (int x=xStart; x<=xEnd; x++)
-        {
-            for (int y=yStart; y<=yEnd; y++)
-            {
-                if (masterData[x][y][slice] != -1)
-                {
-                    average += masterData[x][y][slice];
-                    count++;
-                }
+    for (int row=sliceHeightD; row <= sliceHeightU; row++) {
+        for (int col=sliceWidthL; col <= sliceWidthR; col++) {
+            localInstr = GetLobe(col,row);
+            if (localInstr != 0 && masterData[row][col][slice] > TRIM_THRESHOLD) {
+                localInstr = (localInstr-1)%3;
+                averageArray[localInstr] += masterData[row][col][slice];
+                countArray[localInstr]++;
             }
         }
-        
-        
-        if (count > 0)
-        {
-            average /= count;
-        }
-        averageArray[instr]=average;
     }
+
+    std::cout << "\n ***************** HOLY MOLY OLY ******************* \n";
+
+    for (int i=0; i<3; i++) {
+        averageArray[i] /= countArray[i];
+        std::cout << averageArray[i] << "\t";
+    }
+
+    std::cout << "\n";
+
+    // // Calculate x-boundaries of beat column
+    // xStart = sliceWidthL;
+    // xEnd = sliceWidthR;
+
+    // // Iterate through each instrument in beat column
+    // for (int instr=0; instr<3; instr++)
+    // {
+        
+    //     // Calculate y-boundaries of instrument within beat column
+    //     yStart = int(sliceHeightD + instr*yRatio);
+    //     yEnd = int(sliceHeightD + (instr+1)*yRatio) - 1;
+        
+        
+    //     // Compute average of each grid-square
+    //     average = 0;
+    //     count = 0;
+        
+        
+    //     for (int x=xStart; x<=xEnd; x++)
+    //     {
+    //         for (int y=yStart; y<=yEnd; y++)
+    //         {
+    //             if (masterData[x][y][slice] != -1)
+    //             {
+    //                 average += masterData[x][y][slice];
+    //                 count++;
+    //             }
+    //         }
+    //     }
+        
+        
+    //     if (count > 0)
+    //     {
+    //         average /= count;
+    //     }
+    //     averageArray[instr]=average;
+    // }
+
+    std::cout << "Made it till we did before.\n";
 
     // -----------------------------
     // Generate lines
@@ -749,17 +770,35 @@ void SonificationEngine::ModeOneSonify()
     
     WriteHeader(scoreFile);
 
+    std::cout << "Wrote header.\n";
 
+    std::ifstream scdOsc;
+    std::string scdOscStr;
     for (int i=0; i<3; i++) {
         averageArrayInt[i] = (int)(MODE_ONE_FREQ*(1 - DETUNE_FACTOR*(averageArray[1] - averageArray[i])/averageArray[1]));
+        std::cout << "Calculated freq " << i << "\n";
 
-        if (i == 2) {
-            std::sprintf(scoreLine, "%d", averageArrayInt[i]);    
+        std::cout << "Starting pre.\n";
+        scdOsc.open(CSOUNDFILES_PATH "scd_pre_osc.txt");
+        while (scdOsc.good())
+        {
+            getline(scdOsc,scdOscStr);
+            scoreFile << "\n" << scdOscStr;
         }
-        else {
-            std::sprintf(scoreLine, "%d,", averageArrayInt[i]);    
+        scdOsc.close();
+
+        std::cout << "Starting score.\n";
+        std::sprintf(scoreLine,"%d", averageArrayInt[i]);
+        scoreFile << scoreLine;
+
+        std::cout << "Starting post.\n";
+        scdOsc.open(CSOUNDFILES_PATH "scd_post_osc.txt");
+        while (scdOsc.good())
+        {
+            getline(scdOsc,scdOscStr);
+            scoreFile << "\n" << scdOscStr;
         }
-        scoreFile << scoreLine;    
+        scdOsc.close();
     }
         
     // --------------------
