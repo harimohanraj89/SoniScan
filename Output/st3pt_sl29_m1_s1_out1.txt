@@ -1,4 +1,13 @@
-]], 0, 0.1))
+
+(
+s.recSampleFormat = 'int16';
+s.recHeaderFormat = 'wav'
+)
+
+(
+a = SynthDef(\UGen_ex1b, {
+
+Out.ar(0, SinOsc.ar([[438, 440, 441],[438, 440, 441]], 0, 0.1))
 }).play(s);	
    s.prepareForRecord
 )

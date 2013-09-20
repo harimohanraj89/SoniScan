@@ -777,29 +777,10 @@ void SonificationEngine::ModeOneSonify()
     for (int i=0; i<3; i++) {
         averageArrayInt[i] = (int)(MODE_ONE_FREQ*(1 - DETUNE_FACTOR*(averageArray[1] - averageArray[i])/averageArray[1]));
         std::cout << "Calculated freq " << i << "\n";
-
-        std::cout << "Starting pre.\n";
-        scdOsc.open(CSOUNDFILES_PATH "scd_pre_osc.txt");
-        while (scdOsc.good())
-        {
-            getline(scdOsc,scdOscStr);
-            scoreFile << "\n" << scdOscStr;
-        }
-        scdOsc.close();
-
-        std::cout << "Starting score.\n";
-        std::sprintf(scoreLine,"%d", averageArrayInt[i]);
-        scoreFile << scoreLine;
-
-        std::cout << "Starting post.\n";
-        scdOsc.open(CSOUNDFILES_PATH "scd_post_osc.txt");
-        while (scdOsc.good())
-        {
-            getline(scdOsc,scdOscStr);
-            scoreFile << "\n" << scdOscStr;
-        }
-        scdOsc.close();
     }
+
+    sprintf(scoreLine,"%d, %d, %d],[%d, %d, %d", averageArrayInt[0],averageArrayInt[1],averageArrayInt[2],averageArrayInt[0],averageArrayInt[1],averageArrayInt[2]);
+    scoreFile << scoreLine;
         
     // --------------------
     // Display all averages
