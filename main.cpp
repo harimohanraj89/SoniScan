@@ -32,7 +32,7 @@ int main(void)
     int parameterInput;
     char charInput[128];
     int batchFlag = 0;
-    strcpy(charInput,"test_a");
+    strcpy(charInput,"st3pt");
     
     ControlBlock control;
     SonificationEngine engine;
@@ -40,7 +40,7 @@ int main(void)
     control.SetEngine(&engine);
     char dataLine[MAX_SCORELINE_LENGTH];
     sprintf(dataLine,TEST_DATA_PATH TEST_DATA_FILENAME_1 ".txt");
-    control.ReadFile(TEST_DATA_FILENAME_1);
+    control.ReadFile("st3pt");
     
     // ================================
     // TESTING GROUNDS

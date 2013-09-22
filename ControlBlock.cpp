@@ -66,15 +66,15 @@ void ControlBlock::ClearMasterData()
     {
         for (int y=0; y<masterDataSize[1]; y++)
         {
-            delete[] masterData[x][y];
+            delete [] masterData[x][y];
         }
         
-        delete[] masterData[x];
+        delete [] masterData[x];
     }
     
     if (masterData != 0)
     {
-        delete[] masterData;
+        delete [] masterData;
     }
 }
 
@@ -584,10 +584,10 @@ void ControlBlock::ReadFile(char* argFilename)
     TrimMasterData();
     engine->SetMasterData(masterData,masterDataSize);
     
-    delete[] X;
-    delete[] Y;
-    delete[] Z;
-    delete[] vals;
+    delete [] X;
+    delete [] Y;
+    delete [] Z;
+    delete [] vals;
     
     std::strcpy(dataFilename, argFilename);
     engine->SetDataFilename(dataFilename);   
