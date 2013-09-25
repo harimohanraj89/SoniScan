@@ -379,7 +379,10 @@ void SonificationEngine::UpdateScoreLine(float xFraction, float yFraction, float
             // ------------------
             if (instr == 0)
             {
-                currInstr = (int)((float)NUM_INSTR*yFraction) + 1;
+                currInstr = GetLobe(xFraction*sliceWidth + sliceWidthL, yFraction*sliceHeight + sliceHeightD);
+                if (currInstr > 3) {
+                    currInstr -= 3;
+                }
             }
             
             // NOTE INDEX
