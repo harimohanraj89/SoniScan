@@ -30,6 +30,9 @@ class SonificationEngine
     int currInstr;
     int output;             // Output: 0 = Csound instrument and audio output
                             //         1 = MIDI file output
+    float centerFreq;         // Center Freq: Mode 1 center (reference) frequency
+    float detuneFactor;       // Detune Factor: Mode 1 sensitivity, ie...
+                            //                freqRatioDeviation = intensityRatioDeviation * detuneFactor
 
     
     float instrBoundaries[NUM_INSTR+1]; // Specifies the boundaries at which the instrument transitions are made
@@ -77,7 +80,15 @@ public:
     
     float GetInstrBoundary(int);
     void SetInstrBoundary(float,int);
+
+    float GetCenterFreq();
+    void SetCenterFreq(float);
+
+    float GetDetuneFactor();
+    void SetDetuneFactor(float);
+
     // -----------------------------------
+
     void SetMasterData(float***,int[]);
     void SonifySelect();
     

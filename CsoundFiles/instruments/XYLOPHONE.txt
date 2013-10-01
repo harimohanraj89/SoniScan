@@ -1,8 +1,8 @@
 #define XYLOPHONE(inno)	#
 instr $inno.
 ; additive synthesis xylophone
-iamp 	=	p6
-ipan 		=	p5
+iamp 	=	p5
+ipan 		=	p6
 
 isine  ftgen  0,0,2^14,10,1
 
@@ -22,6 +22,6 @@ aenv expseg 1, p3*(1/31.147), 0.1, 1, 0.001
 a6 poscil iamp*aenv, ifreq*31.147, isine
 aout sum a1, a2, a3, a4, a5, a6
 
-outs (aout*ipan)/4.0748, (aout*(1-ipan))/4.0748	; if p6 is 1, these dividers for max amp without clipping
+outs (aout*ipan)/4.0748, (aout*(1-ipan))/4.0748	; if p5 is 1, these dividers for max amp without clipping
 endin
 #

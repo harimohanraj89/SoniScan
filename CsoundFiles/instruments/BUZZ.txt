@@ -1,0 +1,26 @@
+#define BUZZ(inno)	#
+instr $inno.
+
+inote table p4, giFtOrgan
+iamp = p5
+ipan = p7
+
+if1 ftgen 1, 0, 1025, 10, 1
+
+tigoto    tieinit
+
+ibegpitch =    inote
+iprevpitch     =    inote	
+goto      cont
+
+tieinit:
+ibegpitch =    iprevpitch
+iprevpitch     =    inote
+
+cont:
+kpitchenv linseg    ibegpitch, .9, inote, abs(p3), inote
+
+aout        buzz iamp, kpitchenv, 18, 1, -1
+outs (aout*ipan), (aout*(1-ipan))	
+endin
+#

@@ -79,6 +79,7 @@ typedef float sample;
 // Brain Lobes parameters
 // =============================
 
+#define PERSPSLICE 0
 #define FPSLICE 30
 #define TOSLICE 68
 
@@ -118,8 +119,21 @@ typedef float sample;
 #define LX 53
 #define LY 56
 
-#define MX 73
+#define MX 0
 #define MY 67
 
+#define NX 149
+#define NY 0
+
+#define OX 193
+#define OY 0
+
+#define PX 148
+#define PY 132
+
+#define QX 111
+#define QY 147
+
+#define MIDLINE 321.5
 #endif
 

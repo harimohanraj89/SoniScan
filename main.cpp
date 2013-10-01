@@ -32,7 +32,7 @@ int main(void)
     int parameterInput;
     char charInput[128];
     int batchFlag = 0;
-    strcpy(charInput,"st3pt");
+    strcpy(charInput,"gen_BB01_perspec");
     
     ControlBlock control;
     SonificationEngine engine;
@@ -40,7 +40,7 @@ int main(void)
     control.SetEngine(&engine);
     char dataLine[MAX_SCORELINE_LENGTH];
     sprintf(dataLine,TEST_DATA_PATH TEST_DATA_FILENAME_1 ".txt");
-    control.ReadFile("st3pt");
+    control.ReadFile(charInput);
     
     // ================================
     // TESTING GROUNDS
@@ -140,7 +140,7 @@ int main(void)
                 cin >> parameterInput;
                 engine.SetMode(parameterInput);
                 break;
-
+                
             case 'd' :
                 cout << "\n0. Simultaneous\n1. L-R scan";
                 cout << "\nEnter scan : ";
@@ -206,67 +206,68 @@ int main(void)
         }
 
     }while (userInput != 'x' && userInput != 'p');
-    
-    
+
     if (batchFlag == 1)
     {
         // ================================
         // BATCH PROCESSOR
         // ================================
         
-        
-        engine.SetInstr(0);
-        engine.SetOutput(1);
-        for (int mode=3; mode <= 3; mode++)
-        {
-            for (int scan=0; scan <=1; scan++)
-            {
-                engine.SetMode(mode);
-                engine.SetScan(scan);
-                
-                std::cout << "\n----------------------------- MILD001 ----------------------\n ";
-                control.ReadFile("MILD001");
-                engine.SetSlice(39);
-                engine.SonifySelect();
-                engine.SetSlice(79);
-                engine.SonifySelect();
-                
-                std::cout << "\n----------------------------- NORMAL006 ----------------------\n ";
-                control.ReadFile("NORMAL006");
-                engine.SetSlice(42);
-                engine.SonifySelect();
-                engine.SetSlice(77);
-                engine.SonifySelect();
-                
-//                std::cout << "\n----------------------------- Hl_E_J ----------------------\n ";
-//                control.ReadFile("Hl_E_J");
-//                engine.SetSlice(18);
-//                engine.SonifySelect();
-//                engine.SetSlice(35);
-//                engine.SonifySelect();
-//                
-//                std::cout << "\n----------------------------- Un_A_L_early ----------------------\n ";
-//                control.ReadFile("Un_A_L_early");
-//                engine.SetSlice(24);
-//                engine.SonifySelect();
-//                engine.SetSlice(38);
-//                engine.SonifySelect();
-//                
-//                std::cout << "\n----------------------------- Un_C_T_mod ----------------------\n ";
-//                control.ReadFile("Un_C_T_mod");
-//                engine.SetSlice(19);
-//                engine.SonifySelect();
-//                engine.SetSlice(35);
-//                engine.SonifySelect();
-//                
-//                std::cout << "\n----------------------------- Un_R_K_severe ----------------------\n ";
-//                control.ReadFile("Un_R_K_severe");
-//                engine.SetSlice(16);
-//                engine.SonifySelect();
-//                engine.SetSlice(37);
-//                engine.SonifySelect();
-            }
+        char fileBase[50][MAX_SCORELINE_LENGTH];
+        char batchFileName[MAX_SCORELINE_LENGTH];
+
+        strcpy(fileBase[0], "gen_AA01");
+        strcpy(fileBase[1], "gen_BB01");
+        strcpy(fileBase[2], "gen_JA01");
+        strcpy(fileBase[3], "gen_JN01");
+        strcpy(fileBase[4], "gen_LB01");
+        strcpy(fileBase[5], "gen_LS01");
+        strcpy(fileBase[6], "gen_ND01");
+        strcpy(fileBase[7], "gen_NR01");
+        strcpy(fileBase[8], "gen_SF01");
+        strcpy(fileBase[9], "gen_SG01");
+        strcpy(fileBase[10], "mil_DO01");
+        strcpy(fileBase[11], "mod_PM01");
+        strcpy(fileBase[12], "nor_DG01");
+        strcpy(fileBase[13], "nor_DG02");
+        strcpy(fileBase[14], "nor_KF01");
+        strcpy(fileBase[15], "nor_LF01");
+        strcpy(fileBase[16], "nor_RS01");
+        strcpy(fileBase[17], "sev_HB01");
+        strcpy(fileBase[18], "sev_RC01");
+
+        int numBase = 19;
+
+        engine.SetInstrBoundary(0.5,0);
+        engine.SetInstrBoundary(0.75,1);
+        engine.SetInstrBoundary(0.87,2);
+        engine.SetInstrBoundary(0.92,3);
+        engine.SetInstrBoundary(1,4);
+
+        for (int baseNum=0; baseNum<numBase; baseNum++) {
+
+            strcpy(batchFileName, fileBase[baseNum]);
+            strcat(batchFileName, "_orthogl");
+            cout << batchFileName << "\n";
+            control.ReadFile(batchFileName);
+            engine.SetSlice(29);
+            engine.SonifySelect();
+
+            strcpy(batchFileName, fileBase[baseNum]);
+            strcat(batchFileName, "_rotated");
+            cout << batchFileName << "\n";
+            control.ReadFile(batchFileName);
+            engine.SetSlice(67);
+            engine.SonifySelect();
+
+            strcpy(batchFileName, fileBase[baseNum]);
+            strcat(batchFileName, "_perspec");
+            cout << batchFileName << "\n";
+            control.ReadFile(batchFileName);
+            engine.SetSlice(0);
+            engine.SonifySelect();
         }
+
     }
 
 }

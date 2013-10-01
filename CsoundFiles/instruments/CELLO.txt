@@ -2,7 +2,7 @@
 instr $inno.
 ; additive synthesis cello
 idur    	=	p3
-iamp    	=	p6
+iamp    	=	p5
 isine  ftgen  0,0,2^14,10,1
 
 ifqc table p4, giFtCello						; additive synth S = fc +- ifm1 +- kfm2 +- lfm3
@@ -13,7 +13,7 @@ indx1   	=	7.5/log(ifqc)				;range from ca 2 to 1
 indx2   	=	15/sqrt(ifqc)				;range from ca 2.6 to .5
 indx3   	=	1.25/sqrt(ifqc)				;range from ca .2 to .038
   
-ipan 		= 	p5
+ipan 		= 	p6
 irise   	= 	.2
 idec    	= 	.2
 inoisdur	= 	.1
@@ -40,7 +40,7 @@ amod3 oscili ifm3*(indx3+ktrans), ifm3, isine
 aout oscili iamp, (ifqc+amod1+amod2+amod3)*(1+kvib), isine
 aout linen aout+attack, irise, idur, idec
 
-outs ((aout*ipan)/4.3496), ((aout*(1-ipan))/4.24255)	; if p6 is 1, these multipliers for max amp without clipping
+outs ((aout*ipan)/4.3496), ((aout*(1-ipan))/4.24255)	; if p5 is 1, these multipliers for max amp without clipping
 endin
 #
 

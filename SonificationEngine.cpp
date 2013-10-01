@@ -133,6 +133,30 @@ void SonificationEngine::SetInstrBoundary(float argValue,int argIndex)
     instrBoundaries[argIndex] = argValue;
 }
 
+float SonificationEngine::GetCenterFreq() 
+{
+    return centerFreq;
+}
+
+void SonificationEngine::SetCenterFreq(float argCenterFreq) 
+{
+    if (argCenterFreq <= 0) {
+        std::cout << "Center frequency must be positive. SetCenterFreq() call ignored.\n";
+        return;
+    }
+    centerFreq = argCenterFreq;
+}
+
+float SonificationEngine::GetDetuneFactor() 
+{
+    return detuneFactor;
+}
+
+void SonificationEngine::SetDetuneFactor(float argDetuneFactor) 
+{
+    detuneFactor = argDetuneFactor;
+}
+
 // ----------------------------------
 
 void SonificationEngine::SetMasterData(float*** argMasterData, int argMasterDataSize[])
@@ -167,7 +191,31 @@ int SonificationEngine::GetInstrNum(float argValue)
 }
 
 int SonificationEngine::GetLobe(int x, int y) {
-    if (std::abs(FPSLICE-slice) < std::abs(TOSLICE-slice)) {    // Frontal Parietal slice
+    if (std::abs(PERSPSLICE-slice) < std::abs(FPSLICE-slice)) {    // Perspective slice
+
+        // Mirror if right half
+        if (x > MIDLINE) {
+            x = 2*MIDLINE - x;
+        }
+
+        // Frontal Lobe
+        if (!PointUpLine(x,y,QX,QY,PX,PY) && !PointRightLine(x,y,QX,QY,NX,NY)) {
+            return 1;
+        }
+
+        // Sensory Motor Cortex
+        if (!PointUpLine(x,y,QX,QY,PX,PY) && PointRightLine(x,y,QX,QY,NX,NY) && !PointRightLine(x,y,PX,PY,OX,OY)) {
+            return 2;
+        }
+
+        // Parietal Lobe
+        if (!PointUpLine (x,y,QX,QY,PX,PY) && PointRightLine(x,y,PX,PY,OX,OY)) {
+            return 3;
+        }
+    }
+
+
+    else if (std::abs(FPSLICE-slice) < std::abs(TOSLICE-slice)) {    // Frontal Parietal slice
 
         // Frontal lobe
         if (!PointUpLine(x,y,AX,AX,BX,BY) && !PointUpLine(x,y,BX,BY,HX,HY) && !PointUpLine(x,y,HX,HY,EX,EY)) {
@@ -185,6 +233,8 @@ int SonificationEngine::GetLobe(int x, int y) {
             return 3;
         }
     }
+
+
     else {  // Temporal Occipital slice
 
         // Occipital Lobe
@@ -660,15 +710,12 @@ void SonificationEngine::SonifySelect()
 
 void SonificationEngine::ModeOneSonify()
 {   
-    float average;
-    int count;
-    int maxValue = pow(2,DATA_BITDEPTH) - 1;
     int instrCount[NUM_INSTR];
     for (int i=0; i<NUM_INSTR; i++)
     {
         instrCount[i] = 0;
     }
-    
+
     // -----------------------------
     // Update slice size variables
     // -----------------------------
@@ -677,27 +724,24 @@ void SonificationEngine::ModeOneSonify()
     // -----------------------------------------------
     // Divide selected rectangle into even grid spaces
     // -----------------------------------------------
-    
-    float xRatio = float(sliceWidth)/float(NUM_BEATS);
-    float yRatio = float(sliceHeight)/float(NUM_INSTR);
-    
+
     float averageArray[3];
     int countArray [3];
-    int averageArrayInt[3];
+    float freqArray[3];
     int localInstr;
 
     for (int i=0; i<3; i++) {
         averageArray[i] = 0;
-        averageArrayInt[i]=0;
+        freqArray[i]=0;
         countArray[i] = 0;
     }
     
-    for (int row=sliceHeightD; row <= sliceHeightU; row++) {
-        for (int col=sliceWidthL; col <= sliceWidthR; col++) {
-            localInstr = GetLobe(col,row);
-            if (localInstr != 0 && masterData[row][col][slice] > TRIM_THRESHOLD) {
+    for (int y=sliceHeightD; y <= sliceHeightU; y++) {
+        for (int x=sliceWidthL; x <= sliceWidthR; x++) {
+            localInstr = GetLobe(x,y);
+            if (localInstr != 0 && masterData[x][y][slice] > TRIM_THRESHOLD) {
                 localInstr = (localInstr-1)%3;
-                averageArray[localInstr] += masterData[row][col][slice];
+                averageArray[localInstr] += masterData[x][y][slice];
                 countArray[localInstr]++;
             }
         }
@@ -728,12 +772,16 @@ void SonificationEngine::ModeOneSonify()
 
     std::ifstream scdOsc;
     std::string scdOscStr;
-    for (int i=0; i<3; i++) {
-        averageArrayInt[i] = (int)(MODE_ONE_FREQ*(1 - DETUNE_FACTOR*(averageArray[1] - averageArray[i])/averageArray[1]));
-        std::cout << "Calculated freq " << i << " : " << averageArrayInt[i] << "\n";
+    if (averageArray[1] == 0) {
+        averageArray[1] = 1;
     }
 
-    sprintf(scoreLine,"%d, %d, %d],[%d, %d, %d", averageArrayInt[0],averageArrayInt[1],averageArrayInt[2],averageArrayInt[0],averageArrayInt[1],averageArrayInt[2]);
+    for (int i=0; i<3; i++) {
+        freqArray[i] = centerFreq * ( 1 - detuneFactor*(averageArray[1]-averageArray[i]) / averageArray[1] );
+        std::cout << "Calculated freq " << i << " : " << freqArray[i] << "\n";
+    }
+
+    sprintf(scoreLine,"%.2f, %.2f, %.2f],[%.2f, %.2f, %.2f", freqArray[0],freqArray[1],freqArray[2],freqArray[0],freqArray[1],freqArray[2]);
     scoreFile << scoreLine;
     
     WriteFooter(scoreFile);
@@ -753,7 +801,6 @@ void SonificationEngine::ModeOneSonify()
 void SonificationEngine::ModeTwoSonify()
 {
     float value;
-    int maxValue = pow(2,DATA_BITDEPTH) - 1;
     int instrCount[NUM_INSTR];
     for (int i=0; i<NUM_INSTR; i++)
     {
@@ -827,7 +874,7 @@ void SonificationEngine::ModeTwoSonify()
     // -------------------------
     // Csound file execution
     // -------------------------
-    system(commandLine);
+    //system(commandLine);
     
     DisplayDiagnostics(fileLine, flagLine, commandLine, instrCount);
 }
@@ -843,7 +890,6 @@ void SonificationEngine::ModeTwoSonify()
 void SonificationEngine::ModeThreeSonify()
 {
     float value;
-    int maxValue = pow(2,DATA_BITDEPTH) - 1;
     int instrCount[NUM_INSTR];
     for (int i=0; i<NUM_INSTR; i++)
     {
@@ -929,7 +975,7 @@ void SonificationEngine::ModeThreeSonify()
     // -------------------------
     // Csound file execution
     // -------------------------
-    system(commandLine);
+    //system(commandLine);
     
     DisplayDiagnostics(fileLine, flagLine, commandLine, instrCount);
 }
@@ -945,11 +991,14 @@ SonificationEngine::SonificationEngine()
     masterDataSize[1] = 0;
     masterDataSize[2] = 0;
     
-    mode = 3;
+    mode = 1;
     scan = 1;
     slice = 0;
     instr = 0;
     output = 1;
+
+    centerFreq = 440;
+    detuneFactor = 0.1;
     strcpy(outputfile,"");
     
 //    for (int i=0; i<NUM_INSTR+1; i++)
@@ -969,9 +1018,9 @@ SonificationEngine::SonificationEngine()
 
     // Linear Boundaries
     instrBoundaries[0] = 0.50;
-    instrBoundaries[1] = 0.625;
-    instrBoundaries[2] = 0.75;
-    instrBoundaries[3] = 0.875;
+    instrBoundaries[1] = 0.75;
+    instrBoundaries[2] = 0.875;
+    instrBoundaries[3] = 0.925;
     instrBoundaries[4] = 1;
     
 }

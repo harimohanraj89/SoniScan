@@ -1,0 +1,23 @@
+
+(
+s.recSampleFormat = 'int16';
+s.recHeaderFormat = 'wav'
+)
+
+(
+a = SynthDef(\UGen_ex1b, {
+
+Out.ar(0, SinOsc.ar([[443.40, 440.00, 437.52],[443.40, 440.00, 437.52]], 0, 0.1))
+}).play(s);	
+   s.prepareForRecord
+)
+
+// could also do LFTri or LFSaw instead of SinOsc for more complex tones
+
+(
+   {
+      s.record;
+      wait(10);
+      s.stopRecording;
+   }.r.play
+)

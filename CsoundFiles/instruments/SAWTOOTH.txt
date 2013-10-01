@@ -1,0 +1,26 @@
+#define SAWTOOTH(inno)	#
+instr $inno.
+
+inote table p4, giFtIdiophone
+iamp = p5
+ipan = p7
+
+if2 ftgen 2, 0, 16384, 10, 1, .5, .333333, .25, .2, .166667, .142857, .125, .111111, .1, .090909, .083333, .076923 ; sawtooth
+
+tigoto    tieinit
+
+ibegpitch =    inote
+iprevpitch     =    inote	
+goto      cont
+
+tieinit:
+ibegpitch =    iprevpitch
+iprevpitch     =    inote
+
+cont:
+kpitchenv linseg    ibegpitch, .9, inote, abs(p3), inote
+
+aout        oscil iamp, kpitchenv, 2
+outs (aout*ipan), (aout*(1-ipan))	
+endin
+#

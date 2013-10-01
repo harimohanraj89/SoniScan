@@ -1,0 +1,26 @@
+#define TRIANGLE(inno)	#
+instr $inno.
+
+inote table p4, giFtFrenchhorn
+iamp = p5
+ipan = p7
+
+if5 ftgen 5, 0, 256, 7, -1, 128, 1, 128, -1 ; Triangle
+
+tigoto    tieinit
+
+ibegpitch =    inote
+iprevpitch     =    inote	
+goto      cont
+
+tieinit:
+ibegpitch =    iprevpitch
+iprevpitch     =    inote
+
+cont:
+kpitchenv linseg    ibegpitch, .9, inote, abs(p3), inote
+
+aout        oscil iamp, kpitchenv, 5
+outs (aout*ipan), (aout*(1-ipan))	
+endin
+#

@@ -5,7 +5,11 @@ instr $inno.
 ifrq table p4, giFtOrgan
 isine  ftgen  0,0,2^14,10,1
 
-kenv linseg 0, .01, p6, p3-.02, p6, .01, 0 			; p6 is iamp
+idur = abs(p3)
+iamp =  p5
+ipan = p6
+
+kenv linseg 0, .01, iamp, idur-.02, iamp, .01, 0
 
 a1     oscil 8,   1      * ifrq,  isine
 a2     oscil 8,   2      * ifrq,  isine
@@ -17,11 +21,10 @@ a7     oscil 1,  10.0794 * ifrq,  isine
 a8     oscil 1,  11.9864 * ifrq,  isine
 a9     oscil 4,  16      * ifrq,  isine
 
-ipan = p5
+aout = kenv * (a1+a2+a3+a4+a5+a6+a7+a8+a9)
 
-aout = kenv* (a1+a2+a3+a4+a5+a6+a7+a8+a9)
-
-outs (aout*ipan)/30.1, (aout*(1-ipan))/30.1		;  if p6 is 1, 30.1 for max amp w/out clipping
+outs (aout*ipan)/30.1, (aout*(1-ipan))/30.1		
+;  if iamp is 1, 30.1 for max amp w/out clipping
 
 endin
 #

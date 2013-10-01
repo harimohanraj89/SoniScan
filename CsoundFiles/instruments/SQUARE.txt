@@ -1,0 +1,26 @@
+#define SQUARE(inno)	#
+instr $inno.
+
+inote table p4, giFtCello
+iamp = p5
+ipan = p7
+
+if4 ftgen 4, 0, 16384, 10, 1, 0, .333333, 0, .2, 0, .142857, 0, .111111, 0, .090909, 0, .076923 ; Square
+
+tigoto    tieinit
+
+ibegpitch =    inote
+iprevpitch     =    inote	
+goto      cont
+
+tieinit:
+ibegpitch =    iprevpitch
+iprevpitch     =    inote
+
+cont:
+kpitchenv linseg    ibegpitch, .9, inote, abs(p3), inote
+
+aout        oscil iamp, kpitchenv, 4
+outs (aout*ipan), (aout*(1-ipan))	
+endin
+#

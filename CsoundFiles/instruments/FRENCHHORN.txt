@@ -1,6 +1,5 @@
 #define FRENCHHORN(inno)	#
 instr $inno.
-
 ; wavetable synthesis french horn
 
 ; parameters
@@ -23,56 +22,81 @@ instr $inno.
 
 ; initial variables
 
-iseed 			=	.5
-iwtsin			=	1
+iseed 		=	.5
 arev init 0
+idur = abs(p3)
 
-ipan 			=	p5
-iampscale		=	2000										; overall amplitude scaling factor
-ifreq table p4, giFtFrenchhorn										; pitch in Hertz
+; function tables
+if1 ftgen 0, 0, 4097, 10, 1 
+if2 ftgen 0, 0, 16, -2, 40, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 10240
+if60 ftgen 0, 0, 4097, -10, 478, 1277, 2340, 4533, 2413, 873, 682, 532, 332, 364, 188, 258, 256, 114, 80, 68, 36
+if61 ftgen 0, 0, 4097, -10, 414, 906, 831, 507, 268, 36
+if62 ftgen 0, 0, 4097, -10, 74, 50, 68, 156, 50, 48, 52, 66 
+if63 ftgen 0, 0, 4097, -10, 677, 2663, 4420, 1597, 1236, 780, 581, 325, 415, 201, 212, 202, 156, 26 
+if64 ftgen 0, 0, 4097, -10, 648, 1635, 828, 149, 89, 41  
+if65 ftgen 0, 0, 4097, -10, 1419, 3414, 901, 503, 204, 146 
+if66 ftgen 0, 0, 4097, -10, 1722, 14359, 5103, 1398, 2062, 696, 652, 266, 264, 176, 164, 75  
+if67 ftgen 0, 0, 4097, -10, 1237, 2287, 237, 72 
+if68 ftgen 0, 0, 4097, -10, 2345, 7796, 1182, 266, 255, 193, 85 
+if69 ftgen 0, 0, 4097, -10, 9834, 16064, 2259, 1625, 1353, 344, 356, 621, 195, 155, 77, 98
+if70 ftgen 0, 0, 4097, -10, 377, 193, 41
+if71 ftgen 0, 0, 4097, -10, 8905, 10946, 1180, 1013, 506, 125, 48
+if72 ftgen 0, 0, 4097, -10, 16460, 4337, 1419, 1255, 43, 205, 81, 73, 60, 38 
+if73 ftgen 0, 0, 4097, -10, 16569, 5563, 1838, 1852, 134, 340, 129, 159, 162, 99 
+if74 ftgen 0, 0, 4097, -10, 10383, 4175, 858, 502, 241, 165 
+if75 ftgen 0, 0, 4097, -10, 15341, 5092, 1554, 640, 101  
+if76 ftgen 0, 0, 4097, -10, 16995, 6133, 1950, 788, 136  
+if77 ftgen 0, 0, 4097, -10, 22560, 9285, 4691, 1837, 342, 294, 307, 222, 288, 103 
+if78 ftgen 0, 0, 4097, -10, 19417, 5904, 1666, 913, 266, 55, 81, 46  
+if79 ftgen 0, 0, 4097, -10, 11940, 1211, 111, 38
+if80 ftgen 0, 0, 4097, -10, 25132, 6780, 2886, 1949, 507, 505, 466, 488, 336, 121
+
+ipan 			=	p6	
+iampscale		=	p5											; overall amplitude scaling factor
+ifreq table p4, giFtFrenchhorn									; pitch in Hertz
 ivibdepth		=	abs(0.500*ifreq/100.0)						; vibrato depth relative to fundamental frequency
 iattack			=	0.040 * (1.1 - .2*iseed)					; attack time with up to +-10% random deviation
 iseed			=	frac(iseed*105.947)	; reset iseed
-idecay			=	0.040 * (1.1 - .2*iseed)					; decay time with up to +-10% random deviation
+idecay			=	0.040 * (1.1 - .2*iseed)					; decay time with up to +-10% random deviation	
 iseed			=	frac(iseed*105.947)
-ifiltcut tablei 9, 2											; lowpass filter cutoff frequency
+ifiltcut tablei 9, if2											; lowpass filter cutoff frequency
 
 iattack			=	(iattack < 6/kr ? 6/kr : iattack)			; minimal attack length
 idecay			=	(idecay < 6/kr ? 6/kr : idecay)				; minimal decay length
-isustain		=	p3 - iattack - idecay
-p3				=	(isustain < 5/kr ? iattack+idecay+5/kr : p3); minimal sustain length
+isustain		=	idur - iattack - idecay
+idur			=	(isustain < 5/kr ? iattack+idecay+5/kr : idur) ; minimal sustain length
 isustain		=	(isustain < 5/kr ? 5/kr : isustain)                     
 iatt			=	iattack/6
 isus			=	isustain/4
 idec			=	idecay/6
 iphase			=	iseed										; use same phase for all wavetables
-iseed          	=	frac(iseed*105.947)
+iseed          	=       frac(iseed*105.947)
 
 ; vibrato block
-kvibdepth linseg .1, .8*p3, 1, .2*p3, .7
-kvibdepth		=	kvibdepth* ivibdepth						; vibrato depth
-kvibdepthr randi .1*kvibdepth, 5, iseed							; up to 10% vibrato depth variation
+kvibdepth linseg .1, .8*idur, 1, .2*idur, .7
+kvibdepth		=	kvibdepth* ivibdepth					; vibrato depth
+kvibdepthr randi .1*kvibdepth, 5, iseed						; up to 10% vibrato depth variation
 iseed			=	frac(iseed*105.947)
 kvibdepth		=	kvibdepth + kvibdepthr
-ivibr1			=	iseed										; vibrato rate
+ivibr1			=	iseed									; vibrato rate
 iseed			=	frac(iseed*105.947)
 ivibr2			=	iseed
 iseed			=	frac(iseed*105.947)
 
 if 0.500 < 0 goto vibrato1
-kvibrate linseg 2.5+ivibr1, p3, 4.5+ivibr2						; if 0.500 positive vibrato gets faster
+kvibrate linseg 2.5+ivibr1, idur, 4.5+ivibr2					; if 0.500 positive vibrato gets faster
 goto vibrato2
 vibrato1:
 ivibr3			=	iseed
 iseed			=	frac(iseed*105.947)
-kvibrate linseg 3.5+ivibr1, .1, 4.5+ivibr2, p3-.1, 2.5+ivibr3	; if 0.500 negative vibrato gets slower
+kvibrate linseg 3.5+ivibr1, .1, 4.5+ivibr2, idur-.1, 2.5+ivibr3	; if 0.500 negative vibrato gets slower
 vibrato2:
-kvibrater randi .1*kvibrate, 5, iseed							; up to 10% vibrato rate variation
+kvibrater randi .1*kvibrate, 5, iseed						; up to 10% vibrato rate variation
 iseed			=	frac(iseed*105.947)
 kvibrate		=	kvibrate + kvibrater
-kvib oscil kvibdepth, kvibrate, iwtsin
+kvib oscil kvibdepth, kvibrate, if1
 
-ifdev1			=	-.012 * iseed								; frequency deviation
+ifdev1			=	-.012 * iseed							; frequency deviation
 iseed			=	frac(iseed*105.947)
 ifdev2			=	.005 * iseed
 iseed			=	frac(iseed*105.947)
@@ -92,7 +116,7 @@ if ifreq <  480.29 goto range6								; (cpspch(8.10) + cpspch(8.11))/2
 goto range7
 
 ; wavetable amplitude envelopes
-range1:														; for low range tones
+range1:												; for low range tones
 kamp1 linseg 0, iatt, 0.000, iatt, 0.000, iatt, 0.298, iatt,         \
 1.478, iatt, 1.901, iatt, 2.154, isus, 2.477, isus, 2.495, isus,        \
 2.489, isus, 1.980, idec, 1.759, idec, 1.506, idec, 1.000, idec,        \
@@ -105,13 +129,13 @@ kamp3 linseg  0, iatt, 1.000, iatt, 0.000, iatt, -4.131, iatt,        \
 -6.188, iatt, -1.422, iatt, 1.704, isus, 6.362, isus, 3.042, isus,      \
 5.736, isus, -0.188, idec, -2.558, idec, -2.409, idec, 0.000, idec,     \
 -1.736, idec, 0.167, idec, 0
-iwt1			=	60										; wavetable numbers
-iwt2			=	61
-iwt3			=	62
+iwt1			=	if60									; wavetable numbers
+iwt2			=	if61
+iwt3			=	if62
 inorm			=	5137
 goto end
 
-range2:														; for low mid-range tones 
+range2:												; for low mid-range tones 
 
 kamp1 linseg  0, iatt, 0.000, iatt, 0.000, iatt, 0.000, iatt,         \ 
 0.308, iatt, 0.926, iatt, 1.370, isus, 3.400, isus, 3.205, isus,        \
@@ -125,13 +149,13 @@ kamp3 linseg  0, iatt, -0.107, iatt, 0.000, iatt, 1.000, iatt,        \
 -0.570, iatt, 0.681, iatt, -1.097, isus, 1.495, isus, 0.152, isus,      \
 0.461, isus, 0.231, idec, 0.228, idec, 0.256, idec, 0.152, idec,        \
 0.087, idec, 0.042, idec, 0
-iwt1			=	63
-iwt2			=	64
-iwt3			=	65
+iwt1			=	if63
+iwt2			=	if64
+iwt3			=	if65
 inorm			=	35685
 goto end
 
-range3:														; for high mid-range tones 
+range3:												; for high mid-range tones 
 
 kamp1 linseg  0, iatt, 0.039, iatt, 0.000, iatt, 0.000, iatt,         \
 0.230, iatt, 0.216, iatt, 0.647, isus, 1.764, isus, 1.961, isus,        \
@@ -145,13 +169,13 @@ kamp3 linseg  0, iatt, -0.361, iatt, 0.000, iatt, 1.000, iatt,        \
 1.369, iatt, 1.865, iatt, 1.101, isus, -.677, isus, -.833, isus,        \
 -.437, isus, -.456, idec, -.465, idec, -.395, idec, -0.144, idec,       \
 -0.061, idec, -0.012, idec, 0
-iwt1			=	66
-iwt2			=	67
-iwt3			=	68
+iwt1			=	if66
+iwt2			=	if67
+iwt3			=	if68
 inorm			=	39632
 goto end
 
-range4:														; for high range tones 
+range4:												; for high range tones 
 
 kamp1 linseg  0, iatt, 0.000, iatt, -0.147, iatt, -0.200, iatt,       \
 -0.453, iatt, -0.522, iatt, 0.000, isus, 2.164, isus, 1.594, isus,      \
@@ -165,13 +189,13 @@ kamp3 linseg  0, iatt, 0.000, iatt, -0.318, iatt, -0.181, iatt,       \
 0.861, iatt, 1.340, iatt, 1.000, isus, -1.669, isus, -0.669, isus,      \
 -2.208, isus, -0.709, idec, -0.388, idec, 0.641, idec, 1.101, idec,     \
 0.817, idec, 0.018, idec, 0
-iwt1			=	69
-iwt2			=	70
-iwt3			=	71
-inorm 			=	26576.1
+iwt1			=	if69
+iwt2			=	if70
+iwt3			=	if71
+inorm 		=	26576.1
 goto end
 
-range5:														; for high range tones 
+range5:												; for high range tones 
 
 kamp1 linseg  0, iatt, 2.298, iatt, 2.017, iatt, 2.099, iatt,         \
 1.624, iatt, 0.536, iatt, 1.979, isus, -2.465, isus, -4.449, isus,      \
@@ -185,13 +209,13 @@ kamp3 linseg  0, iatt, -0.320, iatt, 0.179, iatt, -0.551, iatt,       \
 -0.410, iatt, -0.417, iatt, -0.028, isus, -1.517, isus, -1.523, isus,   \
 -1.057, isus, 0.883, idec, 1.273, idec, 1.000, idec, 0.660, idec,       \
 0.271, idec, 0.026, idec, 0
-iwt1			=	72
-iwt2			=	73
-iwt3			=	74
+iwt1			=	if72
+iwt2			=	if73
+iwt3			=	if74
 inorm			=	26866.7
 goto end
 
-range6:														; for high range tones 
+range6:												; for high range tones 
 
 kamp1 linseg  0, iatt, 6.711, iatt, 4.998, iatt, 3.792, iatt,         \
 -0.554, iatt, -1.261, iatt, -5.584, isus, -4.633, isus, -0.384, isus,   \
@@ -205,13 +229,13 @@ kamp3 linseg  0, iatt, 0.220, iatt, 0.177, iatt, 0.333, iatt,         \
 -0.302, iatt, 0.071, iatt, -0.563, isus, 0.338, isus, 1.214, isus,      \
 0.840, isus, 0.103, idec, 0.003, idec, -0.114, idec, -0.049, idec,      \
 -0.031, idec, -0.017, idec, 0
-iwt1			=	75
-iwt2			=	76
-iwt3			=	77
-inorm			=	31013.2
+iwt1			=	if75
+iwt2			=	if76
+iwt3			=	if77
+inorm		=	31013.2
 goto end
 
-range7:														; for high range tones 
+range7:												; for high range tones 
 
 kamp1 linseg  0, iatt, 0.046, iatt, 0.000, iatt, 0.127, iatt,         \
 0.686, iatt, 1.000, iatt, 1.171, isus, 0.000, isus, 0.667, isus,        \
@@ -225,32 +249,32 @@ kamp3 linseg  0, iatt, -0.014, iatt, 0.000, iatt, 0.102, iatt,        \
 0.006, iatt, 0.000, iatt, -0.016, isus, 1.000, isus, 0.753, isus,       \
 0.367, isus, 0.163, idec, -0.030, idec, -0.118, idec, -0.207, idec,     \
 -0.103, idec, -0.007, idec, 0
-iwt1			=	78
-iwt2			=	79
-iwt3			=	80
-inorm			=	26633.5
+iwt1			=	if78
+iwt2			=	if79
+iwt3			=	if80
+inorm		=	26633.5
 goto end
 
 end:
 kampr1 randi .02*kamp1, 10, iseed							; up to 2% wavetable amplitude variation
-iseed			=	frac(iseed*105.947)
-kamp1			=	kamp1 + kampr1
+iseed		=	frac(iseed*105.947)
+kamp1		=	kamp1 + kampr1
 kampr2 randi .02*kamp2, 10, iseed							; up to 2% wavetable amplitude variation
-iseed			=	frac(iseed*105.947)
-kamp2			=	kamp2 + kampr2
+iseed		=	frac(iseed*105.947)
+kamp2		=	kamp2 + kampr2
 kampr3 randi .02*kamp3, 10, iseed							; up to 2% wavetable amplitude variation
-iseed			=	frac(iseed*105.947)
-kamp3			=	kamp3 + kampr3
+iseed		=	frac(iseed*105.947)
+kamp3		=	kamp3 + kampr3
 
 awt1 oscili kamp1, kfreq, iwt1, iphase						; wavetable lookup
 awt2 oscili kamp2, kfreq, iwt2, iphase
 awt3 oscili kamp3, kfreq, iwt3, iphase
 aout			=	awt1 + awt2 + awt3
 aout			=	aout*(iampscale/inorm)
-kcut linseg 0, iattack, ifiltcut, isustain, ifiltcut, idecay, 0		; lowpass filter for brightness control
+kcut linseg 0, iattack, ifiltcut, isustain, ifiltcut, idecay, 0			; lowpass filter for brightness control
 afilt tone aout, kcut
 aout balance afilt, aout
 arev			=	arev + aout
-	outs (aout*ipan)/10000, (aout*(1-ipan)/10000)
+outs (aout*ipan)/1.0052, (aout*(1-ipan))/1.01601			; if p5 is 1, these dividers for max amp without clipping
 	endin
 #

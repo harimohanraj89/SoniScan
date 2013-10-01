@@ -1,0 +1,27 @@
+; for tying notes
+
+#define TEST(inno)	#
+instr $inno.
+
+inote table p4, giFtOrgan
+iamp = p5
+
+; if1 ftgen 0, 0, 1025, 10, 1
+
+tigoto    tieinit
+
+ibegpitch =    inote
+iprevpitch     =    inote	
+goto      cont
+
+tieinit:
+ibegpitch =    iprevpitch
+iprevpitch     =    inote
+
+cont:
+kpitchenv linseg    ibegpitch, .9, inote, abs(p3), inote
+
+a1        buzz iamp, kpitchenv, 6, 1, -1
+          out  a1
+endin
+#
