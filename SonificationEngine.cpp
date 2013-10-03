@@ -194,9 +194,9 @@ int SonificationEngine::GetLobe(int x, int y) {
     if (std::abs(PERSPSLICE-slice) < std::abs(FPSLICE-slice)) {    // Perspective slice
 
         // Mirror if right half
-        if (x > MIDLINE) {
-            x = 2*MIDLINE - x;
-        }
+        // if (x > MIDLINE) {
+        //     x = 2*MIDLINE - x;
+        // }
 
         // Frontal Lobe
         if (!PointUpLine(x,y,QX,QY,PX,PY) && !PointRightLine(x,y,QX,QY,NX,NY)) {
@@ -551,6 +551,9 @@ void SonificationEngine::GenerateLines(char* fileLine, char* flagLine, char* com
     char localFlagLine[2*MAX_SCORELINE_LENGTH];
     char localCommandLine[2*MAX_SCORELINE_LENGTH];
     char localoutputfile[2*MAX_SCORELINE_LENGTH];
+
+    // Outputfile stuff
+    // ----------------
     if (strcmp(outputfile,"default"))
     {
         std::sprintf(localoutputfile, "%s_sl%d_m%d_s%d", dataFilename, slice, mode, scan);
@@ -559,8 +562,17 @@ void SonificationEngine::GenerateLines(char* fileLine, char* flagLine, char* com
     {
         std::sprintf(localoutputfile,"%s",outputfile);
     }
+    std::strcpy(bareOutputFile, localoutputfile);
     
-    std::sprintf(localFileLine, OUTPUT_PATH "%s_out%d.txt", localoutputfile, output);
+    if (mode == 1) {
+        std::sprintf(localFileLine, OUTPUT_PATH "%s_out%d.scd", localoutputfile, output);    
+    }
+    else {
+        std::sprintf(localFileLine, OUTPUT_PATH "%s_out%d.txt", localoutputfile, output);    
+    }
+    
+    // Flag stuff
+    // ----------------
     if (output == 0)
     {
         std::sprintf(localFlagLine, "-o" OUTPUT_PATH "%s.wav", localoutputfile);
@@ -575,6 +587,8 @@ void SonificationEngine::GenerateLines(char* fileLine, char* flagLine, char* com
     }
     std::sprintf(localCommandLine, CSOUND_PATH "csound %s %s " CSOUND_FLAGS, localFileLine, localFlagLine);
     
+    // Final copies
+    // ----------------
     strcpy(fileLine, localFileLine);
     strcpy(flagLine, localFlagLine);
     strcpy(commandLine,localCommandLine);
@@ -621,19 +635,36 @@ void SonificationEngine::WriteFooter(std::ofstream &file)
     std::string footerLine;
     
     if (mode == 1) {
-        footerFile.open(CSOUNDFILES_PATH "scd_footer.txt");
-    }
-    else {
-        footerFile.open(CSOUNDFILES_PATH "csd_footer.txt");
+
+        footerFile.open(CSOUNDFILES_PATH "scd_pre_footer.txt");
+        while (footerFile.good())
+        {
+            getline(footerFile,footerLine);
+            file << "\n" << footerLine;
+        }
+        footerFile.close();
+
+        file << bareOutputFile << ".wav";
+
+        footerFile.open(CSOUNDFILES_PATH "scd_post_footer.txt");
+        while (footerFile.good())
+        {
+            getline(footerFile,footerLine);
+            file << footerLine << "\n";
+        }
+        footerFile.close();
     }
 
-    while (footerFile.good())
-    {
-        getline(footerFile,footerLine);
-        file << footerLine << "\n";
+    else {
+
+        footerFile.open(CSOUNDFILES_PATH "csd_footer.txt");
+        while (footerFile.good())
+        {
+            getline(footerFile,footerLine);
+            file << footerLine << "\n";
+        }
+        footerFile.close();
     }
-                    
-    footerFile.close();
 }
 
 // ======================
@@ -725,15 +756,21 @@ void SonificationEngine::ModeOneSonify()
     // Divide selected rectangle into even grid spaces
     // -----------------------------------------------
 
-    float averageArray[3];
-    int countArray [3];
-    float freqArray[3];
+    float averageArrayL[3];
+    float averageArrayR[3];
+    int countArrayL [3];
+    int countArrayR [3];
+    float freqArrayL[3];
+    float freqArrayR[3];
     int localInstr;
 
     for (int i=0; i<3; i++) {
-        averageArray[i] = 0;
-        freqArray[i]=0;
-        countArray[i] = 0;
+        averageArrayL[i] = 0;
+        averageArrayR[i] = 0;
+        freqArrayL[i]=0;
+        freqArrayR[i]=0;
+        countArrayL[i] = 0;
+        countArrayR[i] = 0;
     }
     
     for (int y=sliceHeightD; y <= sliceHeightU; y++) {
@@ -741,15 +778,24 @@ void SonificationEngine::ModeOneSonify()
             localInstr = GetLobe(x,y);
             if (localInstr != 0 && masterData[x][y][slice] > TRIM_THRESHOLD) {
                 localInstr = (localInstr-1)%3;
-                averageArray[localInstr] += masterData[x][y][slice];
-                countArray[localInstr]++;
+                averageArrayL[localInstr] += masterData[x][y][slice];
+                countArrayL[localInstr]++;
             }
+
+            localInstr = GetLobe(2*MIDLINE-x,y);
+            if (localInstr != 0 && masterData[x][y][slice] > TRIM_THRESHOLD) {
+                localInstr = (localInstr-1)%3;
+                averageArrayR[localInstr] += masterData[x][y][slice];
+                countArrayR[localInstr]++;
+            }
+
         }
     }
 
     for (int i=0; i<3; i++) {
-        averageArray[i] /= countArray[i];
-        std::cout << averageArray[i] << "\t";
+        averageArrayL[i] /= countArrayL[i];
+        averageArrayR[i] /= countArrayR[i];
+        std::cout << averageArrayL[i] << "\t" << averageArrayR[i] << "\n";
     }
 
     // -----------------------------
@@ -772,22 +818,34 @@ void SonificationEngine::ModeOneSonify()
 
     std::ifstream scdOsc;
     std::string scdOscStr;
-    if (averageArray[1] == 0) {
-        averageArray[1] = 1;
+    if (averageArrayL[1] == 0) {
+        averageArrayL[1] = 1;
     }
+    if (averageArrayR[1] == 0) {
+        averageArrayR[1] = 1;
+    }
+
+    std::cout << averageArrayL[1] << "\t" << averageArrayR[1] << "\n\n\n";
 
     for (int i=0; i<3; i++) {
-        freqArray[i] = centerFreq * ( 1 - detuneFactor*(averageArray[1]-averageArray[i]) / averageArray[1] );
-        std::cout << "Calculated freq " << i << " : " << freqArray[i] << "\n";
+        freqArrayL[i] = centerFreq * ( 1 - detuneFactor*(averageArrayL[1]-averageArrayL[i]) / averageArrayL[1] );
+        freqArrayR[i] = centerFreq * ( 1 - detuneFactor*(averageArrayR[1]-averageArrayR[i]) / averageArrayR[1] );
+        std::cout << "Calculated freq " << i << " : " << freqArrayL[i] << "\t" << freqArrayR[i] << "\n";
     }
 
-    sprintf(scoreLine,"%.2f, %.2f, %.2f],[%.2f, %.2f, %.2f", freqArray[0],freqArray[1],freqArray[2],freqArray[0],freqArray[1],freqArray[2]);
+    if (std::abs(slice - 0) < std::abs(slice-29)) {
+        sprintf(scoreLine,"%.2f, %.2f, %.2f],[%.2f, %.2f, %.2f", freqArrayL[0],freqArrayL[1],freqArrayL[2],freqArrayR[0],freqArrayR[1],freqArrayR[2]);    
+    }
+    else {
+        sprintf(scoreLine,"%.2f, %.2f, %.2f],[%.2f, %.2f, %.2f", freqArrayL[0],freqArrayL[1],freqArrayL[2],freqArrayL[0],freqArrayL[1],freqArrayL[2]);    
+    }
+    
     scoreFile << scoreLine;
     
     WriteFooter(scoreFile);
     scoreFile.close();
     
-    DisplayDiagnostics(fileLine, flagLine, commandLine, instrCount);
+    //DisplayDiagnostics(fileLine, flagLine, commandLine, instrCount);
 }
 
 

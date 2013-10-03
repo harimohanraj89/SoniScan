@@ -6,4 +6,4 @@ s.recHeaderFormat = 'wav'
 (
 a = SynthDef(\UGen_ex1b, {
 
-Out.ar(0, SinOsc.ar([[
+Out.ar(0, LFTri.ar([[

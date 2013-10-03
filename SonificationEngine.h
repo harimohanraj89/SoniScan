@@ -37,6 +37,7 @@ class SonificationEngine
     
     float instrBoundaries[NUM_INSTR+1]; // Specifies the boundaries at which the instrument transitions are made
                                         // for Mode 3 sonification
+    char bareOutputFile[MAX_SCORELINE_LENGTH];
     char outputfile[MAX_SCORELINE_LENGTH];
     char dataFilename[MAX_SCORELINE_LENGTH];
     // Score statement variables
