@@ -101,8 +101,8 @@ int main(void)
             cout << "Instr boundary " << i+1 << " : " << engine.GetInstrBoundary(i) << "\n";
         }
         cout << "\n";
-        cout << "'s' : Set mode\n";
-        cout << "'d' : Set scan\n";
+        cout << "'s' : Set Center Frequency\n";
+        cout << "'d' : Set Detune Factor\n";
         cout << "'p' : Batch Sonify\n";
         cout << "'x' : Exit\n\n";
         cout << "User input : ";
