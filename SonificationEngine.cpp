@@ -845,7 +845,7 @@ void SonificationEngine::ModeOneSonify()
     WriteFooter(scoreFile);
     scoreFile.close();
     
-    //DisplayDiagnostics(fileLine, flagLine, commandLine, instrCount);
+    DisplayDiagnostics(fileLine, flagLine, commandLine, instrCount);
 }
 
 
