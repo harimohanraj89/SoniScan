@@ -29,7 +29,7 @@ int main(void)
     // FILE AND STRING TESTING GROUNDS
     // ================================
     
-    int parameterInput;
+    float parameterInput;
     char charInput[128];
     int batchFlag = 0;
     strcpy(charInput,"gen_BB01_perspec");
@@ -86,113 +86,18 @@ int main(void)
         
         switch (userInput)
         {
-            case 'a' :
-                cout << "\n1. " << TEST_DATA_FILENAME_1;
-                cout << "\n2. " << TEST_DATA_FILENAME_2;
-                cout << "\n3. " << TEST_DATA_FILENAME_3;
-                cout << "\n4. " << TEST_DATA_FILENAME_4;
-                cout << "\n5. Other";
-                cout << "\n";
-                cin >> parameterInput;
-                switch (parameterInput)
-                {
-                    case 1:
-                        cout << "File: " << TEST_DATA_PATH TEST_DATA_FILENAME_1 << "\n";
-                        control.ReadFile(TEST_DATA_FILENAME_1);
-                        strcpy(charInput,TEST_DATA_FILENAME_1);
-                        break;
-                    case 2:
-                        cout << "File: " << TEST_DATA_PATH TEST_DATA_FILENAME_2 << "\n";
-                        control.ReadFile(TEST_DATA_FILENAME_2);
-                        strcpy(charInput,TEST_DATA_FILENAME_2);
-                        break;
-                    case 3:
-                        cout << "File: " << TEST_DATA_PATH TEST_DATA_FILENAME_3 << "\n";
-                        control.ReadFile(TEST_DATA_FILENAME_3);
-                        strcpy(charInput,TEST_DATA_FILENAME_3);
-                        break;
-                    case 4:
-                        cout << "File: " << TEST_DATA_PATH TEST_DATA_FILENAME_4 << "\n";
-                        control.ReadFile(TEST_DATA_FILENAME_4);
-                        strcpy(charInput,TEST_DATA_FILENAME_4);
-                        break;
-                    case 5:
-                        char fileInput[MAX_SCORELINE_LENGTH];
-                        cout << "Enter filename : ";
-                        cin >> fileInput;
-                        control.ReadFile(fileInput);
-                        strcpy(charInput,fileInput);
-                        break;
-                    default:
-                        cout << "Invalid option.\n";
-                        break;
-                }
-                
-                cout << "File read complete.\n";
-                
-                break;
-                
             case 's' :
-                cout << "\n1. Averaged score mode";
-                cout << "\n2. Intensity to pitch - each voxel";
-                cout << "\n3. Intensity to instr - each voxel";
-                cout << "\nEnter mode : ";
+                cout << "\nEnter center frequency : ";
                 cin >> parameterInput;
-                engine.SetMode(parameterInput);
+                engine.SetCenterFreq(parameterInput);
                 break;
                 
             case 'd' :
-                cout << "\n0. Simultaneous\n1. L-R scan";
-                cout << "\nEnter scan : ";
+                cout << "\nEnter detune factor : ";
                 cin >> parameterInput;
-                engine.SetScan(parameterInput);
-                break;
-
-            case 'f' :
-                cout << "\nEnter slice : ";
-                cin >> parameterInput;
-                engine.SetSlice(parameterInput);
+                engine.SetDetuneFactor(parameterInput);
                 break;
                 
-            case 'g' :
-                cout << "\nNumber of instruments available : " << NUM_INSTR;
-                cout << "\nEnter instr (0 for all instr): ";
-                cin >> parameterInput;
-                engine.SetInstr(parameterInput);
-                break;
-            
-            case 'h' :
-                cout << "\n0. CSound instrument audio file\n";
-                cout << "1. MIDI file";
-                cout << "\nEnter output: ";
-                cin >> parameterInput;
-                engine.SetOutput(parameterInput);
-                break;
-                
-            case 'j' :
-                float boundaryInput;
-                cout << "\nEnter boundary index to change : \n";
-                cin >> parameterInput;
-                cout << "Enter boundary value for boundary index " << parameterInput << " : ";
-                cin >> boundaryInput;
-                engine.SetInstrBoundary(boundaryInput,parameterInput-1);
-                break;
-                
-            case 'k' :
-                cout << "\nEnter output filename : \n";
-                cin >> parameterInput;
-                cout << "Enter boundary value for boundary index " << parameterInput << " : ";
-                cin >> boundaryInput;
-                engine.SetInstrBoundary(boundaryInput,parameterInput-1);
-                break;
-                
-            case 'q' :
-                cout << "\nSonifying...\n";
-                engine.SonifySelect();
-                cout << "\nSonification complete.\n";
-                break;
-                
-
             case 'x' :
                 cout << "\nThank you for using SoniScan.\n";
                 break;
@@ -251,13 +156,6 @@ int main(void)
             cout << batchFileName << "\n";
             control.ReadFile(batchFileName);
             engine.SetSlice(29);
-            engine.SonifySelect();
-
-            strcpy(batchFileName, fileBase[baseNum]);
-            strcat(batchFileName, "_rotated");
-            cout << batchFileName << "\n";
-            control.ReadFile(batchFileName);
-            engine.SetSlice(67);
             engine.SonifySelect();
 
             strcpy(batchFileName, fileBase[baseNum]);
