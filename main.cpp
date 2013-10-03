@@ -92,12 +92,8 @@ int main(void)
         // system("clear");
 
         cout << "SONISCAN\n========\n\n";
-        cout << "Current file   : " << charInput          << "\n";
-        cout << "Current mode   : " << engine.GetMode()   << "\n";
-        cout << "Current scan   : " << engine.GetScan()   << "\n";
-        cout << "Current slice  : " << engine.GetSlice()  << "\n";
-        cout << "Current instr  : " << engine.GetInstr()  << "\n";
-        cout << "Current output : " << engine.GetOutput() << "\n";
+        cout << "Current center freq   : " << engine.GetCenterFreq()   << "\n";
+        cout << "Current detune factor : " << engine.GetDetuneFactor()   << "\n";
         cout << "\n";
         
         for (int i=0; i<NUM_INSTR+1; i++)
