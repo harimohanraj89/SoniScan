@@ -1,6 +1,9 @@
 # Data folder
 DataFiles/*
 
+# Output folder
+Output/*
+
 # C++ objects
 *.o
 SoniScan
