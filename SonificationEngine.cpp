@@ -644,7 +644,7 @@ void SonificationEngine::WriteFooter(std::ofstream &file)
         }
         footerFile.close();
 
-        file << bareOutputFile << ".wav";
+        // file << bareOutputFile << ".wav";
 
         footerFile.open(CSOUNDFILES_PATH "scd_post_footer.txt");
         while (footerFile.good())
@@ -834,13 +834,29 @@ void SonificationEngine::ModeOneSonify()
     }
 
     if (std::abs(slice - 0) < std::abs(slice-29)) {
-        sprintf(scoreLine,"%.2f, %.2f, %.2f],[%.2f, %.2f, %.2f", freqArrayL[0],freqArrayL[1],freqArrayL[2],freqArrayR[0],freqArrayR[1],freqArrayR[2]);    
+
     }
     else {
-        sprintf(scoreLine,"%.2f, %.2f, %.2f],[%.2f, %.2f, %.2f", freqArrayL[0],freqArrayL[1],freqArrayL[2],freqArrayL[0],freqArrayL[1],freqArrayL[2]);    
+        freqArrayR[0] = freqArrayL[0];
+        freqArrayR[1] = freqArrayL[1];
+        freqArrayR[2] = freqArrayL[2];
     }
+
+    scoreFile << "p = " << (freqArrayL[0] + freqArrayR[0])/2 << ";\n";
+    scoreFile << "q = " << (freqArrayL[1] + freqArrayR[1])/2 << ";\n";
+    scoreFile << "r = " << (freqArrayL[2] + freqArrayR[2])/2 << ";\n";    
+
+    scoreFile << "t = " << freqArrayL[0] << ";\n";
+    scoreFile << "u = " << freqArrayL[1] << ";\n";
+    scoreFile << "v = " << freqArrayL[2] << ";\n";
+
+    scoreFile << "x = " << freqArrayR[0] << ";\n";
+    scoreFile << "y = " << freqArrayR[1] << ";\n";
+    scoreFile << "z = " << freqArrayR[2] << ";\n";
+
+    scoreFile << "~output = \"" << bareOutputFile << "\";\n";
     
-    scoreFile << scoreLine;
+    // scoreFile << scoreLine;
     
     WriteFooter(scoreFile);
     scoreFile.close();

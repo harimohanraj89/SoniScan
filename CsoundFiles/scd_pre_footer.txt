@@ -1,3 +1,125 @@
-]], 0, 0.1))
-}).play(s);	
-   s.prepareForRecord("
+d = 1;
+
+w = Window.new(~output).layout_(
+    VLayout(
+		HLayout(
+		Button().states_([
+			["Play Left", Color.green, Color.black],
+			["Stop Left", Color.red, Color.black]])
+			.mouseDownAction_({
+				if( d == 1,
+					{ a = SynthDef(\UGen_ex1b, {
+						Out.ar(0, LFTri.ar([[t, u, v],0], 0, 0.1))
+						}).play;
+						d = 0;
+					},
+					{
+						a.free;
+						d = 1;
+					});
+			}),
+		Button().states_([
+			["Play Both", Color.green, Color.black],
+			["Stop Both", Color.red, Color.black]])
+			.mouseDownAction_({
+				if( d == 1,
+					{ a = SynthDef(\UGen_ex1b, {
+						Out.ar(0, LFTri.ar([[p, q, r],[p, q, r]], 0, 0.1))
+						}).play;
+						d = 0;
+					},
+					{
+						a.free;
+						d = 1;
+					});
+			}),
+		Button().states_([
+			["Play Right", Color.green, Color.black],
+			["Stop Right", Color.red, Color.black]])
+			.mouseDownAction_({
+				if( d == 1,
+					{ a = SynthDef(\UGen_ex1b, {
+						Out.ar(0, LFTri.ar([0, [x, y, z]], 0, 0.1))
+						}).play;
+						d = 0;
+					},
+					{
+						a.free;
+						d = 1;
+					});
+			}),
+		Button().states_([
+				["Rec Left", Color.green, Color.black]])
+			.mouseDownAction_({
+					Task({
+						s.recSampleFormat = 'int16';
+						s.recHeaderFormat = 'wav';
+						s.prepareForRecord("../Users/jameskeary/Documents/Sonification/Soni_GUI/OUTPUT/" ++ ~output ++ "_leftchannel_TRIOSC.wav");
+						wait(0.2);
+						s.record;
+						"Recording".postln;
+						wait(0.01);
+						(
+							a = SynthDef(\UGen_ex1b, {
+								Out.ar(0, LFTri.ar([[t, u, v],0], 0, 0.1))
+							}).play(s);
+						);
+						wait(20.01);
+						a.free;
+						s.stopRecording;
+						"Stopped Recording".postln;
+					}).start;
+			}),
+		Button().states_([
+				["Rec Both", Color.green, Color.black]])
+			.mouseDownAction_({
+				Task({
+						s.recSampleFormat = 'int16';
+						s.recHeaderFormat = 'wav';
+						s.prepareForRecord("../Users/jameskeary/Documents/Sonification/Soni_GUI/OUTPUT/" ++ ~output ++ "_TRIOSC.wav");
+						wait(0.2);
+						s.record;
+						"Recording".postln;
+						wait(0.01);
+						(
+							a = SynthDef(\UGen_ex1b, {
+								Out.ar(0, LFTri.ar([[p, q, r],[p, q, r]], 0, 0.1))
+							}).play(s);
+						);
+						wait(20.01);
+						a.free;
+						s.stopRecording;
+						"Stopped Recording".postln;
+					}).start;
+			}),
+		Button().states_([
+			["Rec Right", Color.green, Color.black]])
+			.mouseDownAction_({
+				Task({
+						s.recSampleFormat = 'int16';
+						s.recHeaderFormat = 'wav';
+						s.prepareForRecord("../Users/jameskeary/Documents/Sonification/Soni_GUI/OUTPUT/" ++ ~output ++ "_rightchannel_TRIOSC.wav");
+						wait(0.2);
+						s.record;
+						"Recording".postln;
+						wait(0.01);
+						(
+							a = SynthDef(\UGen_ex1b, {
+					Out.ar(0, LFTri.ar([0, [x, y, z]], 0, 0.1))
+							}).play(s);
+						);
+						wait(20.01);
+						a.free;
+						s.stopRecording;
+						"Stopped Recording".postln;
+					}).start;
+			}),
+		)
+	)
+).front;
+
+(
+i = SCImage.open("/Users/jameskeary/Documents/Sonification/Soni_GUI/images/" ++ ~output.at(0) ++ ~output.at(1) ++ ~output.at(2) ++ ~output.at(3) ++ ~output.at(4) ++ ~output.at(5) ++ ~output.at(6) ++ ~output.at(7) ++ ~output.at(8) ++ ~output.at(9) ++ ~output.at(10) ++ ~output.at(11) ++ ~output.at(12) ++ ~output.at(13) ++ ~output.at(14) ++ ~output.at(15) ++ "_img.png");
+i.plot(freeOnClose:true);
+i.url.postln;
+)

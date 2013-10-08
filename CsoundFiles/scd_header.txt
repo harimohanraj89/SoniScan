@@ -1,9 +1,14 @@
-(
-s.recSampleFormat = 'int16';
-s.recHeaderFormat = 'wav'
-)
-
-(
-a = SynthDef(\UGen_ex1b, {
-
-Out.ar(0, LFTri.ar([[
+// center
+// p = 440;
+// q = 440;
+// r = 440;
+// left
+// t = 437.79;
+// u = 440.00;
+// v = 429.62;
+// right
+// x = 300;
+// y = 302;
+// z = 299;
+// OUTPUT
+// ~output = "sev_RC01_perspec_sl0_m1_s0_out1";
