@@ -31,7 +31,6 @@ int main(void)
 
     float parameterInput;
     char charInput[128];
-    int batchFlag = 0;
     strcpy(charInput,"gen_BB01_perspec");
     
     ControlBlock control;
@@ -55,6 +54,7 @@ int main(void)
 
     char fileBase[50][MAX_SCORELINE_LENGTH];
     char batchFileName[MAX_SCORELINE_LENGTH];
+    ofstream numLog;
 
     strcpy(fileBase[0], "gen_AA01");
     strcpy(fileBase[1], "gen_BB01");
@@ -127,6 +127,10 @@ int main(void)
                 // ================================
                 // BATCH PROCESSOR
                 // ================================
+
+                numLog.open(OUTPUT_PATH NUMBERS_LOG, std::ios::trunc);
+                numLog << "Brain, L Frontal, L SMC, L Parietal, R Frontal, R SMC, R Parietal\n";
+                numLog.close();
 
                 for (int baseNum=0; baseNum<numBase; baseNum++) {
 

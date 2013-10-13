@@ -667,6 +667,25 @@ void SonificationEngine::WriteFooter(std::ofstream &file)
     }
 }
 
+void SonificationEngine::WriteToLog(char* fileLine, float avL[], float avR[]) {
+
+    std::ofstream numLog;
+    numLog.open(OUTPUT_PATH NUMBERS_LOG, std::ios::app);
+
+    for (int i=std::strlen(OUTPUT_PATH); i<std::strlen(OUTPUT_PATH)+16; i++) {
+        numLog << fileLine[i];    
+    }
+ 
+    for (int i=0; i<3; i++) {
+        numLog << ", " << avL[i]/avL[1];
+    }
+    for (int i=0; i<3; i++) {
+        numLog << ", " << avR[i]/avR[1];
+    }
+    numLog << "\n";
+    numLog.close();
+}
+
 // ======================
 // SONIFICATION FUNCTIONS
 // ======================
@@ -825,21 +844,19 @@ void SonificationEngine::ModeOneSonify()
         averageArrayR[1] = 1;
     }
 
-    std::cout << averageArrayL[1] << "\t" << averageArrayR[1] << "\n\n\n";
+    if (std::abs(slice - 0) < std::abs(slice-29)) {
+
+    }
+    else {
+        averageArrayR[0] = averageArrayL[0];
+        averageArrayR[1] = averageArrayL[1];
+        averageArrayR[2] = averageArrayL[2];
+    }
 
     for (int i=0; i<3; i++) {
         freqArrayL[i] = centerFreq * ( 1 - detuneFactor*(averageArrayL[1]-averageArrayL[i]) / averageArrayL[1] );
         freqArrayR[i] = centerFreq * ( 1 - detuneFactor*(averageArrayR[1]-averageArrayR[i]) / averageArrayR[1] );
         std::cout << "Calculated freq " << i << " : " << freqArrayL[i] << "\t" << freqArrayR[i] << "\n";
-    }
-
-    if (std::abs(slice - 0) < std::abs(slice-29)) {
-
-    }
-    else {
-        freqArrayR[0] = freqArrayL[0];
-        freqArrayR[1] = freqArrayL[1];
-        freqArrayR[2] = freqArrayL[2];
     }
 
     scoreFile << "p = " << (freqArrayL[0] + freqArrayR[0])/2 << ";\n";
@@ -860,7 +877,7 @@ void SonificationEngine::ModeOneSonify()
     
     WriteFooter(scoreFile);
     scoreFile.close();
-    
+    WriteToLog(fileLine, averageArrayL, averageArrayR);
     DisplayDiagnostics(fileLine, flagLine, commandLine, instrCount);
 }
 

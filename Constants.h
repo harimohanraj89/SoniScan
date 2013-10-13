@@ -43,6 +43,7 @@ typedef float sample;
 #define TEST_DATA_PATH "./DataFiles/"
 #define CSOUNDFILES_PATH "./CsoundFiles/"  //  <---- Change this to the path where you are storing your CSound files for this project
 #define OUTPUT_PATH "./Output/"
+#define NUMBERS_LOG "numbers_log.csv"
 // =======================
 // ControlBlock parameters
 // =======================

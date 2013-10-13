@@ -102,6 +102,7 @@ public:
     void UpdateScoreLine(float,float,float);
     void WriteHeader(std::ofstream&);
     void WriteFooter(std::ofstream&);
+    void WriteToLog(char* , float[], float[]);
     void GenerateLines(char*,char*,char*);
     void DisplayDiagnostics(char*,char*,char*,int[]);
     
