@@ -1,125 +1,261 @@
+// some variables
+Server.default = s = Server.internal.boot; // GOTTA USE INTERNAL SERVER FOR SCOPE!
+s.scope(2);
+s.freqscope;
 d = 1;
 
-w = Window.new(~output).layout_(
-    VLayout(
-		HLayout(
-		Button().states_([
-			["Play Left", Color.green, Color.black],
-			["Stop Left", Color.red, Color.black]])
-			.mouseDownAction_({
-				if( d == 1,
-					{ a = SynthDef(\UGen_ex1b, {
-						Out.ar(0, LFTri.ar([[t, u, v],0], 0, 0.1))
-						}).play;
-						d = 0;
-					},
-					{
-						a.free;
-						d = 1;
-					});
-			}),
-		Button().states_([
-			["Play Both", Color.green, Color.black],
-			["Stop Both", Color.red, Color.black]])
-			.mouseDownAction_({
-				if( d == 1,
-					{ a = SynthDef(\UGen_ex1b, {
-						Out.ar(0, LFTri.ar([[p, q, r],[p, q, r]], 0, 0.1))
-						}).play;
-						d = 0;
-					},
-					{
-						a.free;
-						d = 1;
-					});
-			}),
-		Button().states_([
-			["Play Right", Color.green, Color.black],
-			["Stop Right", Color.red, Color.black]])
-			.mouseDownAction_({
-				if( d == 1,
-					{ a = SynthDef(\UGen_ex1b, {
-						Out.ar(0, LFTri.ar([0, [x, y, z]], 0, 0.1))
-						}).play;
-						d = 0;
-					},
-					{
-						a.free;
-						d = 1;
-					});
-			}),
-		Button().states_([
-				["Rec Left", Color.green, Color.black]])
-			.mouseDownAction_({
-					Task({
-						s.recSampleFormat = 'int16';
-						s.recHeaderFormat = 'wav';
-						s.prepareForRecord("../Users/jameskeary/Documents/Sonification/Soni_GUI/OUTPUT/" ++ ~output ++ "_leftchannel_TRIOSC.wav");
-						wait(0.2);
-						s.record;
-						"Recording".postln;
-						wait(0.01);
-						(
-							a = SynthDef(\UGen_ex1b, {
-								Out.ar(0, LFTri.ar([[t, u, v],0], 0, 0.1))
-							}).play(s);
-						);
-						wait(20.01);
-						a.free;
-						s.stopRecording;
-						"Stopped Recording".postln;
-					}).start;
-			}),
-		Button().states_([
-				["Rec Both", Color.green, Color.black]])
-			.mouseDownAction_({
-				Task({
-						s.recSampleFormat = 'int16';
-						s.recHeaderFormat = 'wav';
-						s.prepareForRecord("../Users/jameskeary/Documents/Sonification/Soni_GUI/OUTPUT/" ++ ~output ++ "_TRIOSC.wav");
-						wait(0.2);
-						s.record;
-						"Recording".postln;
-						wait(0.01);
-						(
-							a = SynthDef(\UGen_ex1b, {
-								Out.ar(0, LFTri.ar([[p, q, r],[p, q, r]], 0, 0.1))
-							}).play(s);
-						);
-						wait(20.01);
-						a.free;
-						s.stopRecording;
-						"Stopped Recording".postln;
-					}).start;
-			}),
-		Button().states_([
-			["Rec Right", Color.green, Color.black]])
-			.mouseDownAction_({
-				Task({
-						s.recSampleFormat = 'int16';
-						s.recHeaderFormat = 'wav';
-						s.prepareForRecord("../Users/jameskeary/Documents/Sonification/Soni_GUI/OUTPUT/" ++ ~output ++ "_rightchannel_TRIOSC.wav");
-						wait(0.2);
-						s.record;
-						"Recording".postln;
-						wait(0.01);
-						(
-							a = SynthDef(\UGen_ex1b, {
-					Out.ar(0, LFTri.ar([0, [x, y, z]], 0, 0.1))
-							}).play(s);
-						);
-						wait(20.01);
-						a.free;
-						s.stopRecording;
-						"Stopped Recording".postln;
-					}).start;
-			}),
-		)
-	)
-).front;
+~path = "../Users/jameskeary/Dropbox/Sonification/Soni_GUI/OUTPUT/";
+~tail = "_TRIOSC.wav";
+~worst = "";
 
-(
-i = SCImage.open("/Users/jameskeary/Documents/Sonification/Soni_GUI/images/" ++ ~output.at(0) ++ ~output.at(1) ++ ~output.at(2) ++ ~output.at(3) ++ ~output.at(4) ++ ~output.at(5) ++ ~output.at(6) ++ ~output.at(7) ++ ~output.at(8) ++ ~output.at(9) ++ ~output.at(10) ++ ~output.at(11) ++ ~output.at(12) ++ ~output.at(13) ++ ~output.at(14) ++ ~output.at(15) ++ "_img.png");
-i.plot(freeOnClose:true);
-i.url.postln;
+i = SCImage.new("../Users/jameskeary/Dropbox/Sonification/Soni_GUI/images/" ++ ~output.at(0) ++ ~output.at(1) ++ ~output.at(2) ++ ~output.at(3) ++ ~output.at(4) ++ ~output.at(5) ++ ~output.at(6) ++ ~output.at(7) ++ ~output.at(8) ++ ~output.at(9) ++ ~output.at(10) ++ ~output.at(11) ++ ~output.at(12) ++ ~output.at(13) ++ ~output.at(14) ++ ~output.at(15) ++ "_img.png");
+
+~window = SCWindow(~output, Rect(rrand(1,1000),rrand(1,1000), 515, 520));
+~window.view.background_(Color.black);
+~window.view.decorator = ~flowlayout = FlowLayout(~window.view.bounds);
+
+SCButton(~window, Rect(0, 0, 123, 24)).states_([
+				["Play Left", Color.black, Color.rand],
+				["Stop Left", Color.black, Color.red]])
+			.mouseDownAction_({
+				l.string = "";
+				if( d == 1,
+					c = (t*(h)*f)+f;
+					b = (v*(h)*f)+f;
+					{ a = SynthDef(\UGen_ex1b, {
+						Out.ar(0, LFTri.ar([[c,f,b],0], 0, 0.1));
+						}).play;
+						l.string="playing left";
+						d = 0;
+					},
+					{
+						a.free;
+						d = 1;
+						l.string="";
+					}
+				);
+			});
+			
+SCButton(~window, Rect(0, 0, 123, 24)).states_([
+				["Play Both", Color.black, Color.rand],
+				["Stop Both", Color.black, Color.red]])
+			.mouseDownAction_({
+				l.string = "";
+				if( d == 1,
+					c = (p*(h)*f)+f;
+					b = (r*(h)*f)+f;
+					{ a = SynthDef(\UGen_ex1b, {
+						Out.ar(0, LFTri.ar([[c,f,b],[c,f,b]], 0, 0.1))
+						}).play;
+						l.string="playing both";
+						d = 0;
+					},
+					{
+						a.free;
+						d = 1;
+						l.string="";
+					}
+				);
+			});
+			
+SCButton(~window, Rect(0, 0, 123, 24)).states_([
+				["Play Right", Color.black, Color.rand],
+				["Stop Right", Color.black, Color.red]])
+			.mouseDownAction_({
+				l.string = "";
+				if( d == 1,
+					c = (x*(h)*f)+f;
+					b = (z*(h)*f)+f;
+					{ a = SynthDef(\UGen_ex1b, {
+						Out.ar(0, LFTri.ar([0, [c,f,b]], 0, 0.1))
+						}).play;
+						l.string="playing right";
+						d = 0;
+					},
+					{
+						a.free;
+						d = 1;
+						l.string="";
+					}
+				);
+			});
+			
+SCButton(~window, Rect(0, 0, 123, 24)).states_([
+				["Play Worst", Color.black, Color.rand],
+				["Stop Worst", Color.black, Color.red]])
+			.mouseDownAction_({
+				if( d == 1,
+					~leftabs = abs(u-t) + abs(u-v);
+					~rightabs = abs(y-x) + abs(y-z); 
+					~bothabs = abs(q-p) + abs(q-r);
+					o = [~leftabs, ~rightabs, ~bothabs].round.asInteger;
+					switch (o.maxItem,
+						~leftabs, {c=(t*(h)*f)+f; b = (v*(h)*f)+f},
+						~rightabs, {c=(x*(h)*f)+f; b = (z*(h)*f)+f},
+						~bothabs, {c = (p*(h)*f)+f; b = (r*(h)*f)+f},
+						);
+					{ a = SynthDef(\UGen_ex1b, {
+						Out.ar(0, LFTri.ar([[c,f,b],[c,f,b]], 0, 0.1))
+						}).play;
+						l.string= "playing worst";
+						d = 0;
+					},
+					{
+						a.free;
+						d = 1;
+						l.string="";
+					}
+				);
+			});
+		
+SCButton(~window, Rect(0, 0, 123, 24)).states_([
+				["Rec Left", Color.black, Color.rand]])
+			.mouseDownAction_({
+				l.string = "recording left";
+				Task({
+					s.recSampleFormat = 'int16';
+					s.recHeaderFormat = 'wav';
+					s.prepareForRecord(~path++~output++"_leftlobe"++~tail);
+					wait(0.2);
+					s.record;
+					"Recording".postln;
+					wait(0.01);
+					c = (t*(h)*f)+f;
+					b = (v*(h)*f)+f;
+					( a = SynthDef(\UGen_ex1b, {
+							Out.ar(0, LFTri.ar([[c,f,b],0], 0, 0.1))
+						}).play(s);
+					);
+					wait(20.01);
+					a.free;
+					s.stopRecording;
+					"Stopped Recording".postln;
+				}).start;
+			});
+			
+SCButton(~window, Rect(0, 0, 123, 24)).states_([
+				["Rec Both", Color.black, Color.rand]])
+			.mouseDownAction_({
+				l.string = "";
+				l.string = "recording both";
+				Task({
+					s.recSampleFormat = 'int16';
+					s.recHeaderFormat = 'wav';
+					s.prepareForRecord(~path++~output++~tail);
+					wait(0.2);
+					s.record;
+					"Recording".postln;
+					wait(0.01);
+					c = (p*(h)*f)+f;
+					b = (r*(h)*f)+f;
+					( a = SynthDef(\UGen_ex1b, {
+							Out.ar(0, LFTri.ar([[c,f,b],[c,f,b]], 0, 0.1))
+						}).play(s);
+					);
+					wait(20.01);
+					a.free;
+					s.stopRecording;
+					"Stopped Recording".postln;
+				}).start;
+			});
+			
+SCButton(~window, Rect(0, 0, 123, 24)).states_([
+				["Rec Right", Color.black, Color.rand]])
+			.mouseDownAction_({
+				l.string = "";
+				l.string = "recording right";
+				Task({
+					s.recSampleFormat = 'int16';
+					s.recHeaderFormat = 'wav';
+					s.prepareForRecord(~path++~output++"_rightlobe"++~tail);
+					wait(0.2);
+					s.record;
+					"Recording".postln;
+					wait(0.01);
+					c = (x*(h)*f)+f;
+					b = (z*(h)*f)+f;
+					( a = SynthDef(\UGen_ex1b, {
+							Out.ar(0, LFTri.ar([0, [c,f,b]], 0, 0.1))
+						}).play(s);
+					);
+					wait(20.01);
+					a.free;
+					s.stopRecording;
+					"Stopped Recording".postln;
+				}).start;
+			});
+			
+SCButton(~window, Rect(0, 0, 123, 24)).states_([
+				["Rec Worst", Color.black, Color.rand]])
+			.mouseDownAction_({
+				l.string = "";
+				l.string = "recording worst";
+				Task({
+					s.recSampleFormat = 'int16';
+					s.recHeaderFormat = 'wav';
+					s.prepareForRecord(~path++~output++~worst++~tail);
+					wait(0.2);
+					s.record;
+					"Recording".postln;
+					wait(0.01);
+					~leftabs = abs(u-t) + abs(u-v);
+					~rightabs = abs(y-x) + abs(y-z); 
+					~bothabs = abs(q-p) + abs(q-r);
+					o = [~leftabs, ~rightabs, ~bothabs].round.asInteger;
+					switch (o.maxItem,
+						~leftabs, {c=(t*(h)*f)+f; b = (v*(h)*f)+f},
+						~rightabs, {c=(x*(h)*f)+f; b = (z*(h)*f)+f},
+						~bothabs, {c = (p*(h)*f)+f; b = (r*(h)*f)+f},
+					);
+					( a = SynthDef(\UGen_ex1b, {
+							Out.ar(0, LFTri.ar([[c,f,b],[c,f,b]], 0, 0.1))
+						}).play(s);
+					);
+					wait(20.01);
+					a.free;
+					l.free;
+					s.stopRecording;
+					"Stopped Recording".postln;
+				}).start;
+			});
+
+SCStaticText(~window, Rect(130, 60, 60, 20)).string_("Detuning:").stringColor_(Color.white);
+~slider = SCSlider(~window, Rect(20,100,100,20))
+.value_(h.linlin(0.05, 0.20, 0, 1))
+.action_({
+	j.value_(~slider.value)
+	}).background_(Color.rand)
+	.action_({
+		h = ~slider.value.linlin(0,1,0.05,0.2);
+		j.string_(h.value.asString);
+		c = (p*(h)*f)+f;
+		b = (r*(h)*f)+f;
+		e.string = b;
+		k.string = c;
+		//a.set(\freq, c);
+	});
+j = SCNumberBox(~window, Rect(20, 20, 130, 20)).background_(Color.rand);
+j.string = h;
+
+~flowlayout.nextLine;
+
+~window.onClose_({ i.free }); // free the image when the window is closed
+~window.drawFunc_({i.drawInRect(Rect(10,90,500,500), Rect(10,10,1200,1200), 2, 1.0)});
+
+96.do({ ~flowlayout.nextLine;
+});
+
+l = SCTextField(~window, Rect(1, 1, 505, 20)).align_(\center).stringColor_(Color.red);
+SCStaticText(~window, Rect(130, 60, 60, 20)).string_("frontal:").stringColor_(Color.white);
+e = SCNumberBox(~window, Rect(20, 20, 120, 20)).background_(Color.rand);
+e.string = b;
+SCStaticText(~window, Rect(130, 60, 80, 20)).string_("motor cortex:").stringColor_(Color.white);
+g = SCNumberBox(~window, Rect(20, 20, 40, 20)).background_(Color.rand);
+g.string = f;
+SCStaticText(~window, Rect(130, 60, 60, 20)).string_("parietal:").stringColor_(Color.white);
+k = SCNumberBox(~window, Rect(20, 20, 120, 20)).background_(Color.rand);
+k.string = c;
+
+~window.onClose_({s.free});
+~window.front;
 )

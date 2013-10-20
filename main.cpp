@@ -57,15 +57,15 @@ int main(void)
     ofstream numLog;
 
     strcpy(fileBase[0], "gen_AA01");
-    strcpy(fileBase[1], "gen_BB01");
-    strcpy(fileBase[2], "gen_JA01");
+    strcpy(fileBase[1], "nor_BB01");
+    strcpy(fileBase[2], "mil_JA01");
     strcpy(fileBase[3], "gen_JN01");
     strcpy(fileBase[4], "gen_LB01");
-    strcpy(fileBase[5], "gen_LS01");
+    strcpy(fileBase[5], "mil_LS01");
     strcpy(fileBase[6], "gen_ND01");
     strcpy(fileBase[7], "gen_NR01");
-    strcpy(fileBase[8], "gen_SF01");
-    strcpy(fileBase[9], "gen_SG01");
+    strcpy(fileBase[8], "mil_SF01");
+    strcpy(fileBase[9], "mod_SG01");
     strcpy(fileBase[10], "mil_DO01");
     strcpy(fileBase[11], "mod_PM01");
     strcpy(fileBase[12], "nor_DG01");
@@ -75,8 +75,11 @@ int main(void)
     strcpy(fileBase[16], "nor_RS01");
     strcpy(fileBase[17], "sev_HB01");
     strcpy(fileBase[18], "sev_RC01");
+    strcpy(fileBase[19], "nor_RF01");
+    strcpy(fileBase[20], "nor_YA01");
+    strcpy(fileBase[21], "sev_HB02");
 
-    int numBase = 19;
+    int numBase = 22;
     // ================================
     // TESTING GROUNDS
     // ================================

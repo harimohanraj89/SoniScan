@@ -1,14 +1,24 @@
-// center
-// p = 440;
-// q = 440;
-// r = 440;
-// left
-// t = 437.79;
-// u = 440.00;
-// v = 429.62;
-// right
-// x = 300;
-// y = 302;
-// z = 299;
-// OUTPUT
-// ~output = "sev_RC01_perspec_sl0_m1_s0_out1";
+/*
+HEADER 
+
+variables provided by soniscan++, include given detune percentage, deviation values, and name of the output file
+
+center : [p,q,r]
+left : [t,u,v]
+right : [x,y,z]
+OUTPUT string of file name : ~output
+*/
+
+(
+// h = 0.20; // detune value
+// f = 440; // frequency
+// p = 0.008;
+// q = 0;
+// r = 0.10125;
+// t = 0.008;
+// u = 0;
+// v = 0.10125;
+// x = 0.008;
+// y = 0;
+// z = 0.10125;
+// ~output = "gen_AA01_orthogl_sl29_m1_s1";

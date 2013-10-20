@@ -677,10 +677,10 @@ void SonificationEngine::WriteToLog(char* fileLine, float avL[], float avR[]) {
     }
  
     for (int i=0; i<3; i++) {
-        numLog << ", " << avL[i]/avL[1];
+        numLog << ", " << MODE_ONE_FREQ * detuneFactor * (avL[i] - avL[1])/avL[1];
     }
     for (int i=0; i<3; i++) {
-        numLog << ", " << avR[i]/avR[1];
+        numLog << ", " << MODE_ONE_FREQ * detuneFactor * (avR[i] - avR[1])/avR[1];
     }
     numLog << "\n";
     numLog.close();
@@ -779,6 +779,8 @@ void SonificationEngine::ModeOneSonify()
     float averageArrayR[3];
     int countArrayL [3];
     int countArrayR [3];
+    float devL[3];
+    float devR[3];
     float freqArrayL[3];
     float freqArrayR[3];
     int localInstr;
@@ -854,26 +856,31 @@ void SonificationEngine::ModeOneSonify()
     }
 
     for (int i=0; i<3; i++) {
-        freqArrayL[i] = centerFreq * ( 1 - detuneFactor*(averageArrayL[1]-averageArrayL[i]) / averageArrayL[1] );
-        freqArrayR[i] = centerFreq * ( 1 - detuneFactor*(averageArrayR[1]-averageArrayR[i]) / averageArrayR[1] );
+        devL[i] = (averageArrayL[i]-averageArrayL[1]) / averageArrayL[1];
+        devR[i] = (averageArrayR[i]-averageArrayR[1]) / averageArrayR[1];
+    }
+
+    for (int i=0; i<3; i++) {
+        freqArrayL[i] = centerFreq * ( 1 - detuneFactor*devL[i]);
+        freqArrayR[i] = centerFreq * ( 1 - detuneFactor*devR[i]);
         std::cout << "Calculated freq " << i << " : " << freqArrayL[i] << "\t" << freqArrayR[i] << "\n";
     }
 
-    scoreFile << "p = " << (freqArrayL[0] + freqArrayR[0])/2 << ";\n";
-    scoreFile << "q = " << (freqArrayL[1] + freqArrayR[1])/2 << ";\n";
-    scoreFile << "r = " << (freqArrayL[2] + freqArrayR[2])/2 << ";\n";    
+    scoreFile << "h = " << detuneFactor << ";\n";
 
-    scoreFile << "t = " << freqArrayL[0] << ";\n";
-    scoreFile << "u = " << freqArrayL[1] << ";\n";
-    scoreFile << "v = " << freqArrayL[2] << ";\n";
+    scoreFile << "p = " << (devL[0]+devR[0])/2 << ";\n";
+    scoreFile << "q = " << (devL[1]+devR[1])/2 << ";\n";
+    scoreFile << "r = " << (devL[2]+devR[2])/2 << ";\n";    
 
-    scoreFile << "x = " << freqArrayR[0] << ";\n";
-    scoreFile << "y = " << freqArrayR[1] << ";\n";
-    scoreFile << "z = " << freqArrayR[2] << ";\n";
+    scoreFile << "t = " << devL[0] << ";\n";
+    scoreFile << "u = " << devL[1] << ";\n";
+    scoreFile << "v = " << devL[2] << ";\n";
+
+    scoreFile << "x = " << devR[0] << ";\n";
+    scoreFile << "y = " << devR[1] << ";\n";
+    scoreFile << "z = " << devR[2] << ";\n";
 
     scoreFile << "~output = \"" << bareOutputFile << "\";\n";
-    
-    // scoreFile << scoreLine;
     
     WriteFooter(scoreFile);
     scoreFile.close();
