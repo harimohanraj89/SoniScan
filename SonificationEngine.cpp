@@ -866,19 +866,19 @@ void SonificationEngine::ModeOneSonify()
         std::cout << "Calculated freq " << i << " : " << freqArrayL[i] << "\t" << freqArrayR[i] << "\n";
     }
 
-    scoreFile << "h = " << detuneFactor << ";\n";
+    scoreFile << "~detune1 = " << detuneFactor << ";\n";
 
-    scoreFile << "p = " << (devL[0]+devR[0])/2 << ";\n";
-    scoreFile << "q = " << (devL[1]+devR[1])/2 << ";\n";
-    scoreFile << "r = " << (devL[2]+devR[2])/2 << ";\n";    
+    scoreFile << "~bF = " << (devL[0]+devR[0])/2 << ";\n";
+    scoreFile << "~bMC = " << (devL[1]+devR[1])/2 << ";\n";
+    scoreFile << "~bP = " << (devL[2]+devR[2])/2 << ";\n";    
 
-    scoreFile << "t = " << devL[0] << ";\n";
-    scoreFile << "u = " << devL[1] << ";\n";
-    scoreFile << "v = " << devL[2] << ";\n";
+    scoreFile << "~lF = " << devL[0] << ";\n";
+    scoreFile << "~lMC = " << devL[1] << ";\n";
+    scoreFile << "~lP = " << devL[2] << ";\n";
 
-    scoreFile << "x = " << devR[0] << ";\n";
-    scoreFile << "y = " << devR[1] << ";\n";
-    scoreFile << "z = " << devR[2] << ";\n";
+    scoreFile << "~rF = " << devR[0] << ";\n";
+    scoreFile << "~rMC = " << devR[1] << ";\n";
+    scoreFile << "~rP = " << devR[2] << ";\n";
 
     scoreFile << "~output = \"" << bareOutputFile << "\";\n";
     

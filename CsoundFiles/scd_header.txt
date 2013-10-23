@@ -3,22 +3,13 @@ HEADER
 
 variables provided by soniscan++, include given detune percentage, deviation values, and name of the output file
 
-center : [p,q,r]
-left : [t,u,v]
-right : [x,y,z]
+both : [p,q,r] --> new variable names [~bF,~bMC,~bP]
+left : [t,u,v] --> new variable names [~lF,~lMC,~lP]
+right : [x,y,z] --> new variable names [~rF,~rMC,~rP]
 OUTPUT string of file name : ~output
 */
 
+// Next steps : radio button for stereo spread hasn't been implemented yet, cant input freq values yet into the frequency value boxes. Not an external program yet.
+
 (
-// h = 0.20; // detune value
-// f = 440; // frequency
-// p = 0.008;
-// q = 0;
-// r = 0.10125;
-// t = 0.008;
-// u = 0;
-// v = 0.10125;
-// x = 0.008;
-// y = 0;
-// z = 0.10125;
-// ~output = "gen_AA01_orthogl_sl29_m1_s1";
+

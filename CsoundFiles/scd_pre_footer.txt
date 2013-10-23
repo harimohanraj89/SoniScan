@@ -1,261 +1,705 @@
-// some variables
+
+// Start the server
 Server.default = s = Server.internal.boot; // GOTTA USE INTERNAL SERVER FOR SCOPE!
 s.scope(2);
 s.freqscope;
-d = 1;
+//s.meter;
 
-~path = "../Users/jameskeary/Dropbox/Sonification/Soni_GUI/OUTPUT/";
+// some more variables
+~detune2 = ~detune1; // detune value 2
 ~tail = "_TRIOSC.wav";
-~worst = "";
+~outpath = "../Users/jameskeary/Dropbox/Sonification/Soni_GUI/OUTPUT/";
+~imgpath = "../Users/jameskeary/Dropbox/Sonification/Soni_GUI/images/";
+i = SCImage.new(~imgpath ++ ~output.subStr(0,15) ++ "_img.png");
+~lastplayed = nil;
 
-i = SCImage.new("../Users/jameskeary/Dropbox/Sonification/Soni_GUI/images/" ++ ~output.at(0) ++ ~output.at(1) ++ ~output.at(2) ++ ~output.at(3) ++ ~output.at(4) ++ ~output.at(5) ++ ~output.at(6) ++ ~output.at(7) ++ ~output.at(8) ++ ~output.at(9) ++ ~output.at(10) ++ ~output.at(11) ++ ~output.at(12) ++ ~output.at(13) ++ ~output.at(14) ++ ~output.at(15) ++ "_img.png");
+// SYNTHESIZERS
+(
+	SynthDef.new(\Tri, { 
+			arg freq1 = 0, freq2 = 0, amp1 = 0, amp2 = 0;
+			Out.ar(0, LFTri.ar([[freq1], [freq2]], 0, [[amp1], [amp2]]));
+			};
+	);
+).send(s);
 
-~window = SCWindow(~output, Rect(rrand(1,1000),rrand(1,1000), 515, 520));
-~window.view.background_(Color.black);
+(
+	SynthDef.new(\Sine, { 
+			arg freq1 = 0, freq2 = 0, amp1 = 0, amp2 = 0;
+			Out.ar(0, SinOsc.ar([[freq1],[freq2]], 0, [[amp1], [amp2]]));
+			};
+	);
+).send(s);
+
+(
+	SynthDef.new(\Saw, { 
+			arg freq1 = 0, freq2 = 0, amp1 = 0, amp2 = 0;
+			Out.ar(0, LFSaw.ar([[freq1],[freq2]], 0, [[amp1], [amp2]]));
+			};
+	);
+).send(s);
+
+(
+	SynthDef.new(\Square, { 
+			arg freq1 = 0, freq2 = 0, amp1 = 0, amp2 = 0;
+			Out.ar(0, LFPulse.ar([[freq1],[freq2]], 0, 0.5, [[amp1], [amp2]], 0));
+			};
+	);
+).send(s);
+
+
+// initialize synths with defaults
+a = Synth.new(\Tri, [freq1:~ffreq,freq2:~ffreq,amp1:0,amp2:0]).run(false);
+~aPlaying = false;
+b = Synth.new(\Tri, [freq1:~basefreq,freq2:~basefreq,amp1:0,amp2:0]).run(false);
+~bPlaying = false;
+c = Synth.new(\Tri, [freq1:~pfreq,freq2:~pfreq,amp1:0,amp2:0]).run(false);
+~cPlaying = false;
+
+// WINDOW
+~window = SCWindow(~output, Rect(1,200,515, 565));
+~window.view.background_(Color.grey);
 ~window.view.decorator = ~flowlayout = FlowLayout(~window.view.bounds);
+~window.front;
+	
+// BUTTONS
+// PLAY LEFT BUTTON
+~playleft = SCButton(~window, Rect(0, 0, 123, 24)).states_([["Play Left", Color.black, Color.new255(199, 199, 199)],["Stop Left", Color.black, Color.red]]).action_({
+				arg butt;
+				var ber; 
+				ber = butt.value;
+				if(ber == 1, {	
+					~lastplayed = "playleft";
+					~textbox.string="playing left";
+					if ( ~flipp.value == 0 ) { ~pfreq = (~lP*(~detune2)*~basefreq)+~basefreq; } { ~pfreq = (~basefreq - ((~lP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; };
+					~numbox3.string = ~pfreq;
+					if ( ~flipf.value == 0 ) { ~ffreq = (~lF*(~detune1)*~basefreq)+~basefreq; } { ~ffreq = (~basefreq - ((~lF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; };
+					~numbox1.string = ~ffreq;
+					(
+					~oscil1 = ~menuF.item;
+					~aAmp1 = 0.2;
+					~aAmp2 = 0;
+					a.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+					a.run(true);
+					~aPlaying = true;
+					);
+					(
+					~oscil2 = ~menuMC.item;
+					b.run(true);
+					~aAmp1 = 0.2;
+					~aAmp2 = 0;
+					b.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+					~bPlaying = true;
+					);
+					(
+					~oscil3 = ~menuP.item;
+					c.run(true);
+					~aAmp1 = 0.2;
+					~aAmp2 = 0;
+					c.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+					~cPlaying = true;
+					);
+				});
+				if(ber == 0, {	
+					~textbox.string = "";	
+					if (~aPlaying == true) { a.run(false); ~aPlaying = false; };
+					if (~bPlaying == true) { b.run(false); ~bPlaying = false; };
+					if (~cPlaying == true) { c.run(false); ~cPlaying = false; };
+				});
+			});			
 
-SCButton(~window, Rect(0, 0, 123, 24)).states_([
-				["Play Left", Color.black, Color.rand],
-				["Stop Left", Color.black, Color.red]])
-			.mouseDownAction_({
-				l.string = "";
-				if( d == 1,
-					c = (t*(h)*f)+f;
-					b = (v*(h)*f)+f;
-					{ a = SynthDef(\UGen_ex1b, {
-						Out.ar(0, LFTri.ar([[c,f,b],0], 0, 0.1));
-						}).play;
-						l.string="playing left";
-						d = 0;
-					},
-					{
-						a.free;
-						d = 1;
-						l.string="";
-					}
-				);
-			});
+//PLAY BOTH BUTTON
+~playboth = SCButton(~window, Rect(0, 0, 123, 24)).states_([  
+		["Play Both", Color.black, Color.new255(199, 199, 199)],["Stop Both", Color.black, Color.red]]).action_({
+				arg butt;
+				var ber;
+				ber = butt.value;
+				if( ber == 1, {
+					~lastplayed = "playboth";
+					~textbox.string="playing both";
+					if ( ~flipp.value == 0 ) { ~pfreq = (~bP*(~detune2)*~basefreq)+~basefreq; } { ~pfreq = (~basefreq - ((~bP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; };
+					~numbox3.string = ~pfreq;
+					if ( ~flipf.value == 0 ) { ~ffreq = (~bF*(~detune1)*~basefreq)+~basefreq; } { ~ffreq = (~basefreq - ((~bF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; };
+					~numbox1.string = ~ffreq;		
+					(
+					~oscil1 = ~menuF.item;
+					~aAmp1 = 0.2;
+					~aAmp2 = 0.2;
+					a.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+					a.run(true);
+					~aPlaying = true;
+					);
+					(
+					~oscil2 = ~menuMC.item;
+					b.run(true);
+					~aAmp1 = 0.2;
+					~aAmp2 = 0.2;
+					b.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+					~bPlaying = true;
+					);
+					(
+					~oscil3 = ~menuP.item;
+					c.run(true);
+					~aAmp1 = 0.2;
+					~aAmp2 = 0.2;
+					c.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+					~cPlaying = true;
+					);
+				});
+				if(ber == 0, {	
+					~textbox.string = "";	
+					if (~aPlaying == true) { a.run(false); ~aPlaying = false; };
+					if (~bPlaying == true) { b.run(false); ~bPlaying = false; };
+					if (~cPlaying == true) { c.run(false); ~cPlaying = false; };
+				});
+			});						
+				
 			
-SCButton(~window, Rect(0, 0, 123, 24)).states_([
-				["Play Both", Color.black, Color.rand],
-				["Stop Both", Color.black, Color.red]])
-			.mouseDownAction_({
-				l.string = "";
-				if( d == 1,
-					c = (p*(h)*f)+f;
-					b = (r*(h)*f)+f;
-					{ a = SynthDef(\UGen_ex1b, {
-						Out.ar(0, LFTri.ar([[c,f,b],[c,f,b]], 0, 0.1))
-						}).play;
-						l.string="playing both";
-						d = 0;
-					},
-					{
-						a.free;
-						d = 1;
-						l.string="";
-					}
-				);
-			});
-			
-SCButton(~window, Rect(0, 0, 123, 24)).states_([
-				["Play Right", Color.black, Color.rand],
-				["Stop Right", Color.black, Color.red]])
-			.mouseDownAction_({
-				l.string = "";
-				if( d == 1,
-					c = (x*(h)*f)+f;
-					b = (z*(h)*f)+f;
-					{ a = SynthDef(\UGen_ex1b, {
-						Out.ar(0, LFTri.ar([0, [c,f,b]], 0, 0.1))
-						}).play;
-						l.string="playing right";
-						d = 0;
-					},
-					{
-						a.free;
-						d = 1;
-						l.string="";
-					}
-				);
-			});
-			
-SCButton(~window, Rect(0, 0, 123, 24)).states_([
-				["Play Worst", Color.black, Color.rand],
-				["Stop Worst", Color.black, Color.red]])
-			.mouseDownAction_({
-				if( d == 1,
-					~leftabs = abs(u-t) + abs(u-v);
-					~rightabs = abs(y-x) + abs(y-z); 
-					~bothabs = abs(q-p) + abs(q-r);
-					o = [~leftabs, ~rightabs, ~bothabs].round.asInteger;
-					switch (o.maxItem,
-						~leftabs, {c=(t*(h)*f)+f; b = (v*(h)*f)+f},
-						~rightabs, {c=(x*(h)*f)+f; b = (z*(h)*f)+f},
-						~bothabs, {c = (p*(h)*f)+f; b = (r*(h)*f)+f},
+//PLAY RIGHT BUTTON
+~playright = SCButton(~window, Rect(0, 0, 123, 24)).states_([   
+		["Play Right", Color.black, Color.new255(199, 199, 199)],["Stop Right", Color.black, Color.red]]).action_({
+				arg butt;
+				var ber;
+				ber = butt.value;
+				if( ber == 1, {
+					~lastplayed = "playright";
+					~textbox.string="playing right";
+					if ( ~flipp.value == 0 ) { ~pfreq = (~rP*(~detune2)*~basefreq)+~basefreq; } { ~pfreq = (~basefreq - ((~rP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; };
+					~numbox3.string = ~pfreq;
+					if ( ~flipf.value == 0 ) { ~ffreq = (~rF*(~detune1)*~basefreq)+~basefreq; } { ~ffreq = (~basefreq - ((~rF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; };
+					~numbox1.string = ~ffreq;
+					(
+					~oscil1 = ~menuF.item;
+					~aAmp1 = 0;
+					~aAmp2 = 0.2;
+					a.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+					a.run(true);
+					~aPlaying = true;
+					);
+					(
+					~oscil2 = ~menuMC.item;
+					b.run(true);
+					~aAmp1 = 0;
+					~aAmp2 = 0.2;
+					b.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+					~bPlaying = true;
+					);
+					(
+					~oscil3 = ~menuP.item;
+					c.run(true);
+					~aAmp1 = 0;
+					~aAmp2 = 0.2;
+					c.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+					~cPlaying = true;
+					);
+				});
+				if(ber == 0, {	
+					~textbox.string = "";	
+					if (~aPlaying == true) { a.run(false); ~aPlaying = false; };
+					if (~bPlaying == true) { b.run(false); ~bPlaying = false; };
+					if (~cPlaying == true) { c.run(false); ~cPlaying = false; };
+				});
+			});	
+
+//PLAY WORST REGION BUTTON
+~playworst = SCButton(~window, Rect(0, 0, 123, 24)).states_([  
+		["Play Worst", Color.black, Color.new255(199, 199, 199)],["Stop Worst", Color.black, Color.red]]).action_({
+				arg butt;
+				var ber;
+				ber = butt.value;
+				if( ber == 1, {
+					~lastplayed = "playworst";
+					~leftabs = abs(~lMC-~lF) + abs(~lMC-~lP);
+					~rightabs = abs(~rMC-~rF) + abs(~rMC-~rP); 
+					~bothabs = abs(~bMC -~bF) + abs(~bMC-~bP);
+					~array = [~leftabs, ~rightabs, ~bothabs];
+					switch (~array.maxItem.asString,
+						~leftabs.asString, {
+							if ( ~flipf.value == 0 ) { ~ffreq = (~lF*(~detune1)*~basefreq)+~basefreq; } { ~ffreq = (~basefreq - ((~lF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; }; 
+							if ( ~flipp.value == 0 ) { ~pfreq = (~lP*(~detune2)*~basefreq)+~basefreq; } { ~pfreq = (~basefreq - ((~lP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; }; ~thewrst = "left"},
+						~rightabs.asString, {
+							if ( ~flipf.value == 0 ) { ~ffreq = (~rF*(~detune1)*~basefreq)+~basefreq; } { ~ffreq = (~basefreq - ((~rF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; }; 
+							if ( ~flipp.value == 0 ) { ~pfreq = (~rP*(~detune2)*~basefreq)+~basefreq; } { ~pfreq = (~basefreq - ((~rP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; }; ~thewrst = "right"},
+						~bothabs.asString, {
+							if ( ~flipf.value == 0 ) { ~ffreq = (~bF*(~detune1)*~basefreq)+~basefreq; } { ~ffreq = (~basefreq - ((~bF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; }; 
+							if ( ~flipp.value == 0 ) { ~pfreq = (~bP*(~detune2)*~basefreq)+~basefreq; } { ~pfreq = (~basefreq - ((~bP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; }; ~thewrst = "both"},
+					);
+					~numbox3.string = ~pfreq;
+					~numbox1.string = ~ffreq;
+					~textbox.string="playing " ++ ~thewrst ++ ", "++ ~thewrst ++ " is the worst";
+					(
+					~oscil1 = ~menuF.item;
+					~aAmp1 = 0.2;
+					~aAmp2 = 0.2;
+					a.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+					a.run(true);
+					~aPlaying = true;
+					);
+					(
+					~oscil2 = ~menuMC.item;
+					b.run(true);
+					~aAmp1 = 0.2;
+					~aAmp2 = 0.2;
+					b.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+					~bPlaying = true;
+					);
+					(
+					~oscil3 = ~menuP.item;
+					c.run(true);
+					~aAmp1 = 0.2;
+					~aAmp2 = 0.2;
+					c.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+					~cPlaying = true;
+					);
+				});
+				if(ber == 0, {	
+					~textbox.string = "";	
+					if (~aPlaying == true) { a.run(false); ~aPlaying = false; };
+					if (~bPlaying == true) { b.run(false); ~bPlaying = false; };
+					if (~cPlaying == true) { c.run(false); ~cPlaying = false; };
+				});
+			});	
+
+//RECORDING LEFT
+~recleft = SCButton(~window, Rect(0, 0, 123, 24)).states_([  
+		["Rec Left", Color.black, Color.new255(199, 199, 199)],["Stop Rec", Color.black, Color.red]]).action_({
+				arg butt;
+				var ber;
+				ber = butt.value;
+				if( ber == 1, {
+					~lastplayed = "recleft";
+					if ( ~flipp.value == 0 ) { ~pfreq = (~lP*(~detune2)*~basefreq)+~basefreq; } { ~pfreq = (~basefreq - ((~lP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; };
+					~numbox3.string = ~pfreq;
+					if ( ~flipf.value == 0 ) { ~ffreq = (~lF*(~detune1)*~basefreq)+~basefreq; } { ~ffreq = (~basefreq - ((~lF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; };
+					~numbox1.string = ~ffreq;
+					~textbox.string="recording left";
+					Routine({
+						s.recSampleFormat = 'int16';
+						s.recHeaderFormat = 'wav';
+						s.prepareForRecord(~outpath++~output++"_left"++~tail);
+						wait(0.2);
+						s.record;
+						wait(0.01);
+						(
+						~oscil1 = ~menuF.item;
+						~aAmp1 = 0.2;
+						~aAmp2 = 0;
+						a.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+						a.run(true);
+						~aPlaying = true;
 						);
-					{ a = SynthDef(\UGen_ex1b, {
-						Out.ar(0, LFTri.ar([[c,f,b],[c,f,b]], 0, 0.1))
-						}).play;
-						l.string= "playing worst";
-						d = 0;
-					},
-					{
-						a.free;
-						d = 1;
-						l.string="";
-					}
-				);
-			});
-		
-SCButton(~window, Rect(0, 0, 123, 24)).states_([
-				["Rec Left", Color.black, Color.rand]])
-			.mouseDownAction_({
-				l.string = "recording left";
-				Task({
-					s.recSampleFormat = 'int16';
-					s.recHeaderFormat = 'wav';
-					s.prepareForRecord(~path++~output++"_leftlobe"++~tail);
-					wait(0.2);
-					s.record;
-					"Recording".postln;
-					wait(0.01);
-					c = (t*(h)*f)+f;
-					b = (v*(h)*f)+f;
-					( a = SynthDef(\UGen_ex1b, {
-							Out.ar(0, LFTri.ar([[c,f,b],0], 0, 0.1))
-						}).play(s);
-					);
-					wait(20.01);
-					a.free;
-					s.stopRecording;
-					"Stopped Recording".postln;
-				}).start;
-			});
+						(
+						~oscil2 = ~menuMC.item;
+						b.run(true);
+						~aAmp1 = 0.2;
+						~aAmp2 = 0;
+						b.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+						~bPlaying = true;
+						);
+						(
+						~oscil3 = ~menuP.item;
+						c.run(true);
+						~aAmp1 = 0.2;
+						~aAmp2 = 0;
+						c.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+						~cPlaying = true;
+						);
+						wait(20.01);
+						s.stopRecording;	
+						a.run(false);
+						b.run(false);
+						c.run(false);
+						~recleft.value_(0); 
+						ber = 0;
+					}).play(AppClock);
+				});
+				if( ber == 0, {
+					~textbox.string = "";
+					s.stopRecording;	
+					if (~aPlaying == true) { a.run(false); ~aPlaying = false; };
+					if (~bPlaying == true) { b.run(false); ~bPlaying = false; };
+					if (~cPlaying == true) { c.run(false); ~cPlaying = false; };
+				});
+			});	
 			
-SCButton(~window, Rect(0, 0, 123, 24)).states_([
-				["Rec Both", Color.black, Color.rand]])
-			.mouseDownAction_({
-				l.string = "";
-				l.string = "recording both";
-				Task({
-					s.recSampleFormat = 'int16';
-					s.recHeaderFormat = 'wav';
-					s.prepareForRecord(~path++~output++~tail);
-					wait(0.2);
-					s.record;
-					"Recording".postln;
-					wait(0.01);
-					c = (p*(h)*f)+f;
-					b = (r*(h)*f)+f;
-					( a = SynthDef(\UGen_ex1b, {
-							Out.ar(0, LFTri.ar([[c,f,b],[c,f,b]], 0, 0.1))
-						}).play(s);
-					);
-					wait(20.01);
-					a.free;
-					s.stopRecording;
-					"Stopped Recording".postln;
-				}).start;
-			});
-			
-SCButton(~window, Rect(0, 0, 123, 24)).states_([
-				["Rec Right", Color.black, Color.rand]])
-			.mouseDownAction_({
-				l.string = "";
-				l.string = "recording right";
-				Task({
-					s.recSampleFormat = 'int16';
-					s.recHeaderFormat = 'wav';
-					s.prepareForRecord(~path++~output++"_rightlobe"++~tail);
-					wait(0.2);
-					s.record;
-					"Recording".postln;
-					wait(0.01);
-					c = (x*(h)*f)+f;
-					b = (z*(h)*f)+f;
-					( a = SynthDef(\UGen_ex1b, {
-							Out.ar(0, LFTri.ar([0, [c,f,b]], 0, 0.1))
-						}).play(s);
-					);
-					wait(20.01);
-					a.free;
-					s.stopRecording;
-					"Stopped Recording".postln;
-				}).start;
-			});
-			
-SCButton(~window, Rect(0, 0, 123, 24)).states_([
-				["Rec Worst", Color.black, Color.rand]])
-			.mouseDownAction_({
-				l.string = "";
-				l.string = "recording worst";
-				Task({
-					s.recSampleFormat = 'int16';
-					s.recHeaderFormat = 'wav';
-					s.prepareForRecord(~path++~output++~worst++~tail);
-					wait(0.2);
-					s.record;
-					"Recording".postln;
-					wait(0.01);
-					~leftabs = abs(u-t) + abs(u-v);
-					~rightabs = abs(y-x) + abs(y-z); 
-					~bothabs = abs(q-p) + abs(q-r);
-					o = [~leftabs, ~rightabs, ~bothabs].round.asInteger;
-					switch (o.maxItem,
-						~leftabs, {c=(t*(h)*f)+f; b = (v*(h)*f)+f},
-						~rightabs, {c=(x*(h)*f)+f; b = (z*(h)*f)+f},
-						~bothabs, {c = (p*(h)*f)+f; b = (r*(h)*f)+f},
-					);
-					( a = SynthDef(\UGen_ex1b, {
-							Out.ar(0, LFTri.ar([[c,f,b],[c,f,b]], 0, 0.1))
-						}).play(s);
-					);
-					wait(20.01);
-					a.free;
-					l.free;
-					s.stopRecording;
-					"Stopped Recording".postln;
-				}).start;
-			});
+// RECORDING BOTH
+~recboth = SCButton(~window, Rect(0, 0, 123, 24)).states_([  
+		["Rec Both", Color.black, Color.new255(199, 199, 199)],["Stop Rec", Color.black, Color.red]]).action_({
+				arg butt;
+				var ber;
+				ber = butt.value;
+				if( ber == 1, {
+					~lastplayed = "recboth";
+					if ( ~flipp.value == 0 ) { ~pfreq = (~bP*(~detune2)*~basefreq)+~basefreq; } { ~pfreq = (~basefreq - ((~bP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; };
+					~numbox3.string = ~pfreq;
+					if ( ~flipf.value == 0 ) { ~ffreq = (~bF*(~detune1)*~basefreq)+~basefreq; } { ~ffreq = (~basefreq - ((~bF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; };
+					~numbox1.string = ~ffreq;
+					~textbox.string="recording both";
+					Routine({
+						s.recSampleFormat = 'int16';
+						s.recHeaderFormat = 'wav';
+						s.prepareForRecord(~outpath++~output++"_both"++~tail);
+						wait(0.2);
+						s.record;
+						wait(0.01);
+						(
+						~oscil1 = ~menuF.item;
+						~aAmp1 = 0.2;
+						~aAmp2 = 0.2;
+						a.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+						a.run(true);
+						~aPlaying = true;
+						);
+						(
+						~oscil2 = ~menuMC.item;
+						b.run(true);
+						~aAmp1 = 0.2;
+						~aAmp2 = 0.2;
+						b.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+						~bPlaying = true;
+						);
+						(
+						~oscil3 = ~menuP.item;
+						c.run(true);
+						~aAmp1 = 0.2;
+						~aAmp2 = 0.2;
+						c.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+						~cPlaying = true;
+						);	
+						wait(20.01);
+						s.stopRecording;	
+						a.run(false);
+						b.run(false);
+						c.run(false);
+						~recleft.value_(0); 								ber = 0;
+					}).play(AppClock);
+				});
+				if( ber == 0, {
+					~textbox.string = "";
+					s.stopRecording;	
+					if (~aPlaying == true) { a.run(false); ~aPlaying = false; };
+					if (~bPlaying == true) { b.run(false); ~bPlaying = false; };
+					if (~cPlaying == true) { c.run(false); ~cPlaying = false; };
+				});
+			});	
 
-SCStaticText(~window, Rect(130, 60, 60, 20)).string_("Detuning:").stringColor_(Color.white);
-~slider = SCSlider(~window, Rect(20,100,100,20))
-.value_(h.linlin(0.05, 0.20, 0, 1))
-.action_({
-	j.value_(~slider.value)
-	}).background_(Color.rand)
-	.action_({
-		h = ~slider.value.linlin(0,1,0.05,0.2);
-		j.string_(h.value.asString);
-		c = (p*(h)*f)+f;
-		b = (r*(h)*f)+f;
-		e.string = b;
-		k.string = c;
-		//a.set(\freq, c);
-	});
-j = SCNumberBox(~window, Rect(20, 20, 130, 20)).background_(Color.rand);
-j.string = h;
+//RECORDING RIGHT		
+~recright = SCButton(~window, Rect(0, 0, 123, 24)).states_([  
+		["Rec Right", Color.black, Color.new255(199, 199, 199)],["Stop Rec", Color.black, Color.red]]).action_({
+				arg butt;
+				var ber;
+				ber = butt.value;
+				if( ber == 1, {
+					~lastplayed = "recright";
+					if ( ~flipp.value == 0 ) { ~pfreq = (~rP*(~detune2)*~basefreq)+~basefreq; } { ~pfreq = (~basefreq - ((~rP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; };
+					~numbox3.string = ~pfreq;
+					if ( ~flipf.value == 0 ) { ~ffreq = (~rF*(~detune1)*~basefreq)+~basefreq; } { ~ffreq = (~basefreq - ((~rF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; };
+					~numbox1.string = ~ffreq;
+					~textbox.string="recording right";
+					Routine({
+						s.recSampleFormat = 'int16';
+						s.recHeaderFormat = 'wav';
+						s.prepareForRecord(~outpath++~output++"_right"++~tail);
+						wait(0.2);
+						s.record;
+						wait(0.01);
+						(
+						~oscil1 = ~menuF.item;
+						~aAmp1 = 0;
+						~aAmp2 = 0.2;
+						a.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+						a.run(true);
+						~aPlaying = true;
+						);
+						(
+						~oscil2 = ~menuMC.item;
+						b.run(true);
+						~aAmp1 = 0;
+						~aAmp2 = 0.2;
+						b.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+						~bPlaying = true;
+						);
+						(
+						~oscil3 = ~menuP.item;
+						c.run(true);
+						~aAmp1 = 0;
+						~aAmp2 = 0.2;
+						c.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+						~cPlaying = true;
+						);
+						wait(20.01);
+						s.stopRecording;	
+						a.run(false);
+						b.run(false);
+						c.run(false);
+						~recright.value_(0); 
+						ber = 0;
+					}).play(AppClock);
+				});
+				if( ber == 0, {
+					~textbox.string = "";
+					s.stopRecording;	
+					if (~aPlaying == true) { a.run(false); ~aPlaying = false; };
+					if (~bPlaying == true) { b.run(false); ~bPlaying = false; };
+					if (~cPlaying == true) { c.run(false); ~cPlaying = false; };
+				});
+			});	
 
+//RECORDING WORST		
+~recworst = SCButton(~window, Rect(0, 0, 123, 24)).states_([
+		["Rec Worst", Color.black, Color.new255(199, 199, 199)],["Stop Rec", Color.black, Color.red]]).action_({
+				arg butt;
+				var ber;
+				ber = butt.value;
+				if( ber == 1, {
+					~lastplayed = "recworst";
+					~leftabs = abs(~lMC-~lF) + abs(~lMC-~lP);
+					~rightabs = abs(~rMC-~rF) + abs(~rMC-~rP); 
+					~bothabs = abs(~bMC -~bF) + abs(~bMC-~bP);
+					~array = [~leftabs, ~rightabs, ~bothabs];
+					switch (~array.maxItem.asString,
+						~leftabs.asString, {if ( ~flipf.value == 0 ) { ~ffreq = (~lF*(~detune1)*~basefreq)+~basefreq; } { ~ffreq = (~basefreq - ((~lF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; }; if ( ~flipp.value == 0 ) { ~pfreq = (~lP*(~detune2)*~basefreq)+~basefreq; } { ~pfreq = (~basefreq - ((~lP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; }; ~thewrst = "left"},
+						~rightabs.asString, {if ( ~flipf.value == 0 ) { ~ffreq = (~rF*(~detune1)*~basefreq)+~basefreq; } { ~ffreq = (~basefreq - ((~rF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; }; if ( ~flipp.value == 0 ) { ~pfreq = (~rP*(~detune2)*~basefreq)+~basefreq; } { ~pfreq = (~basefreq - ((~rP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; };  ~thewrst = "right"},
+						~bothabs.asString, {if ( ~flipf.value == 0 ) { ~ffreq = (~bF*(~detune1)*~basefreq)+~basefreq; } { ~ffreq = (~basefreq - ((~bF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; }; if ( ~flipp.value == 0 ) { ~pfreq = (~bP*(~detune2)*~basefreq)+~basefreq; } { ~pfreq = (~basefreq - ((~bP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; }; ~thewrst = "both"},
+					);
+					~numbox3.string = ~pfreq;
+					~numbox1.string = ~ffreq;
+					~textbox.string="recording " ++ ~thewrst ++ ", " ++ ~thewrst ++ " is the worst region";
+					Routine({
+						s.recSampleFormat = 'int16';
+						s.recHeaderFormat = 'wav';
+						s.prepareForRecord(~outpath++~output++"_"++~thewrst++"_worst"++~tail);
+						wait(0.2);
+						s.record;
+						wait(0.01);
+						(
+						~oscil1 = ~menuF.item;
+						~aAmp1 = 0.2;
+						~aAmp2 = 0.2;
+						a.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+						a.run(true);
+						~aPlaying = true;
+						);
+						(
+						~oscil2 = ~menuMC.item;
+						b.run(true);
+						~aAmp1 = 0.2;
+						~aAmp2 = 0.2;
+						b.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+						~bPlaying = true;
+						);
+						(
+						~oscil3 = ~menuP.item;
+						c.run(true);
+						~aAmp1 = 0.2;
+						~aAmp2 = 0.2;
+						c.set(\amp1, ~aAmp1, \amp2, ~aAmp2);
+						~cPlaying = true;
+						);	
+						wait(20.01);
+						s.stopRecording;	
+						a.run(false);
+						b.run(false);
+						c.run(false);
+						~recworst.value_(0); 
+						ber = 0;
+					}).play(AppClock);
+				});
+				if( ber == 0, {
+					~textbox.string = "";
+					s.stopRecording;	
+					if (~aPlaying == true) { a.run(false); ~aPlaying = false; };
+					if (~bPlaying == true) { b.run(false); ~bPlaying = false; };
+					if (~cPlaying == true) { c.run(false); ~cPlaying = false; };
+				});
+			});	
+				
+// MESSAGE BOX
+~textbox = SCTextField(~window, Rect(1, 1, 505, 20)).align_(\center).stringColor_(Color.yellow).background_(Color.new255(0, 0, 139));
 ~flowlayout.nextLine;
 
-~window.onClose_({ i.free }); // free the image when the window is closed
+// BRAIN SCAN IMAGE
 ~window.drawFunc_({i.drawInRect(Rect(10,90,500,500), Rect(10,10,1200,1200), 2, 1.0)});
-
 96.do({ ~flowlayout.nextLine;
 });
 
-l = SCTextField(~window, Rect(1, 1, 505, 20)).align_(\center).stringColor_(Color.red);
-SCStaticText(~window, Rect(130, 60, 60, 20)).string_("frontal:").stringColor_(Color.white);
-e = SCNumberBox(~window, Rect(20, 20, 120, 20)).background_(Color.rand);
-e.string = b;
-SCStaticText(~window, Rect(130, 60, 80, 20)).string_("motor cortex:").stringColor_(Color.white);
-g = SCNumberBox(~window, Rect(20, 20, 40, 20)).background_(Color.rand);
-g.string = f;
-SCStaticText(~window, Rect(130, 60, 60, 20)).string_("parietal:").stringColor_(Color.white);
-k = SCNumberBox(~window, Rect(20, 20, 120, 20)).background_(Color.rand);
-k.string = c;
+// FREQUENCY VALUES DISPLAY
+SCStaticText(~window, Rect(130, 60, 45, 20)).string_("Frontal:").stringColor_(Color.black);
+~numbox1 = SCNumberBox(~window, Rect(20, 20, 110, 20)).stringColor_(Color.yellow).background_(Color.new255(0, 0, 139));
+~flipf = SCButton(~window, Rect(0, 0, 25, 20)).states_([["Inv", Color.black, Color.new255(199, 199, 199)],["Inv", Color.black, Color.red]])
+.action_({ ~ffreq = (~basefreq - ~ffreq) + ~basefreq; ~numbox1.string = ~ffreq; 
+	if ((~playleft.value == 1) || (~recleft.value == 1)) {a.set(\freq1, ~ffreq)}; 
+	if ((~playboth.value == 1) || (~recboth.value == 1)) {a.set(\freq1, ~ffreq, \freq2, ~ffreq)} ;
+	if ((~playright.value == 1) || (~recright.value == 1)) {a.set(\freq2, ~ffreq)};
+	if ((~playworst.value == 1) || (~recworst.value == 1)) {a.set(\freq1, ~ffreq, \freq2, ~ffreq)} ;
+});
+~ffreq = (~bF*(~detune1)*~basefreq)+~basefreq; //display both first
+~numbox1.string = ~ffreq;
 
-~window.onClose_({s.free});
-~window.front;
+SCStaticText(~window, Rect(130, 60, 80, 20)).string_("Motor Cortex:").stringColor_(Color.black);
+~numbox2 = SCNumberBox(~window, Rect(20, 20, 30, 20)).stringColor_(Color.yellow).background_(Color.new255(0, 0, 139)).action_({ arg num; num.value.postln;});
+~numbox2.string = ~basefreq; //display both first
+
+SCStaticText(~window, Rect(130, 60, 50, 20)).string_("Parietal:").stringColor_(Color.black);
+~numbox3 = SCNumberBox(~window, Rect(20, 20, 110, 20)).stringColor_(Color.yellow).background_(Color.new255(0, 0, 139));
+~flipp = SCButton(~window, Rect(0, 0, 25, 20)).states_([["Inv", Color.black, Color.new255(199, 199, 199)],["Inv", Color.black, Color.red]])
+.action_({ ~pfreq = (~basefreq - ~pfreq) + ~basefreq; ~numbox3.string = ~pfreq; 
+	if ((~playleft.value == 1) || (~recleft.value == 1)) {c.set(\freq1, ~pfreq)}; 
+	if ((~playboth.value == 1) || (~recboth.value == 1)) {c.set(\freq1, ~pfreq, \freq2, ~pfreq)} ;
+	if ((~playright.value == 1) || (~recright.value == 1)) {c.set(\freq2, ~pfreq)};
+	if ((~playworst.value == 1) || (~recworst.value == 1)) {c.set(\freq1, ~pfreq, \freq2, ~pfreq)} ;
+});
+~pfreq = (~bP*(~detune2)*~basefreq)+~basefreq;
+~numbox3.string = ~pfreq; //display both first
+
+// FRONTAL DETUNE VALUE AND SLIDER
+SCStaticText(~window, Rect(130, 60, 60, 20)).string_("Detune 1:").stringColor_(Color.black);
+~slider1 = SCSlider(~window, Rect(20,100,90,20))
+.value_(~detune1.linlin(0.05, 0.20, 0, 1))
+.action_({
+	~dbox1.value_(~slider1.value)
+	}).background_(Color.red)
+	.action_({
+		~detune1 = ~slider1.value.linlin(0,1,0.05,0.2);
+		~dbox1.string_(~detune1.value.asString);
+		~whatson = [~playleft.value, ~recleft.value, ~playboth.value, ~recboth.value, ~playright.value, ~recright.value, ~playworst.value, ~recworst.value];
+		if ((~playleft.value == 1) || (~recleft.value == 1) || (~lastplayed == "playleft") || (~lastplayed == "recleft") && (~flipf.value == 0))
+			{~ffreq = (~lF*(~detune1)*~basefreq)+~basefreq; ~numbox1.string = ~ffreq; a.set(\freq1, ~ffreq)};
+		if ((~playleft.value == 1) || (~recleft.value == 1) || (~lastplayed == "playleft") || (~lastplayed == "recleft") && (~flipf.value == 1))
+			{~ffreq = (~basefreq - ((~lF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; ~numbox1.string = ~ffreq; a.set(\freq1, ~ffreq)};
+		if ((~playboth.value == 1) || (~recboth.value == 1) || (~lastplayed == "playboth") || (~lastplayed == "recboth") && (~flipf.value == 0))
+			{~ffreq = (~bF*(~detune1)*~basefreq)+~basefreq; ~numbox1.string = ~ffreq; a.set(\freq1, ~ffreq, \freq2, ~ffreq)};
+		if ((~playboth.value == 1) || (~recboth.value == 1) || (~lastplayed == "playboth") || (~lastplayed == "recboth") && (~flipf.value == 1))
+			{~ffreq = (~basefreq - ((~bF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; ~numbox1.string = ~ffreq; a.set(\freq1, ~ffreq, \freq2, ~ffreq)};
+		if ((~playright.value == 1) || (~recright.value == 1) || (~lastplayed == "playright") || (~lastplayed == "recright") && (~flipf.value == 0))
+			{~ffreq = (~rF*(~detune1)*~basefreq)+~basefreq; ~numbox1.string = ~ffreq; a.set(\freq2, ~ffreq)};
+		if ((~playright.value == 1) || (~recright.value == 1) || (~lastplayed == "playright") || (~lastplayed == "recright") && (~flipf.value == 1))
+			{~ffreq = (~basefreq - ((~rF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; ~numbox1.string = ~ffreq; a.set(\freq2, ~ffreq)};
+		if ((~playworst.value == 1) || (~recworst.value == 1) || (~lastplayed == "playworst") || (~lastplayed == "recworst") && (~thewrst == "left") && (~flipf.value == 0))
+			{~ffreq = (~lF*(~detune1)*~basefreq)+~basefreq; ~numbox1.string = ~ffreq; a.set(\freq1, ~ffreq, \freq2, ~ffreq)};
+		if ((~playworst.value == 1) || (~recworst.value == 1) || (~lastplayed == "playworst") || (~lastplayed == "recworst") && (~thewrst == "left") && (~flipf.value == 1))
+			{~ffreq = (~basefreq - ((~lF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; ~numbox1.string = ~ffreq; a.set(\freq1, ~ffreq, \freq2, ~ffreq)};
+		if ((~playworst.value == 1) || (~recworst.value == 1) || (~lastplayed == "playworst") || (~lastplayed == "recworst") && (~thewrst == "both") && (~flipf.value == 0))
+			{~ffreq = (~bF*(~detune1)*~basefreq)+~basefreq; ~numbox1.string = ~ffreq; a.set(\freq1, ~ffreq, \freq2, ~ffreq)};
+		if ((~playworst.value == 1) || (~recworst.value == 1) || (~lastplayed == "playworst") || (~lastplayed == "recworst") && (~thewrst == "both") && (~flipf.value == 1))
+			{~ffreq = (~basefreq - ((~bF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; ~numbox1.string = ~ffreq; a.set(\freq1, ~ffreq, \freq2, ~ffreq)};
+		if ((~playworst.value == 1) || (~recworst.value == 1) || (~lastplayed == "playworst") || (~lastplayed == "recworst") && (~thewrst == "right") && (~flipf.value == 0))
+			{~ffreq = (~rF*(~detune1)*~basefreq)+~basefreq; ~numbox1.string = ~ffreq; a.set(\freq1, ~ffreq, \freq2, ~ffreq)};
+		if ((~playworst.value == 1) || (~recworst.value == 1) || (~lastplayed == "playworst") || (~lastplayed == "recworst") && (~thewrst == "right") && (~flipf.value == 1))
+			{~ffreq = (~basefreq - ((~rF*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; ~numbox1.string = ~ffreq; a.set(\freq1, ~ffreq, \freq2, ~ffreq)};
+		if ((~whatson == [0,0,0,0,0,0,0,0]) && (~lastplayed.isNil))
+			{~ffreq = ~numbox1.string; ~ffreq = (~bF*(~detune1)*~basefreq)+~basefreq; ~numbox1.string = ~ffreq; a.set(\freq1, ~ffreq, \freq2, ~ffreq)};
+	});
+~dbox1 = SCNumberBox(~window, Rect(20, 20, 90, 20)).stringColor_(Color.yellow).background_(Color.new255(0, 0, 139));
+~dbox1.string = ~detune1;
+
+// PARIETAL DETUNE VALUE AND SLIDER
+SCStaticText(~window, Rect(130, 60, 60, 20)).string_("Detune 2:").stringColor_(Color.black);
+~slider2 = SCSlider(~window, Rect(20,100,90,20))
+.value_(~detune2.linlin(0.05, 0.20, 0, 1))
+.action_({
+	~dbox2.value_(~slider2.value)
+	}).background_(Color.red)
+	.action_({
+		~detune2 = ~slider2.value.linlin(0,1,0.05,0.2);
+		~dbox2.string_(~detune2.value.asString);
+		~whatson = [~playleft.value, ~recleft.value, ~playboth.value, ~recboth.value, ~playright.value, ~recright.value, ~playworst.value, ~recworst.value];
+		if ((~playleft.value == 1) || (~recleft.value == 1) || (~lastplayed == "playleft") || (~lastplayed == "recleft") && (~flipp.value == 0))
+			{~pfreq = (~lP*(~detune2)*~basefreq)+~basefreq; ~numbox3.string = ~pfreq; c.set(\freq1, ~pfreq)};
+		if ((~playleft.value == 1) || (~recleft.value == 1) || (~lastplayed == "playleft") || (~lastplayed == "recleft") && (~flipp.value == 1))
+			{~pfreq = (~basefreq - ((~lP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; ~numbox3.string = ~pfreq; c.set(\freq1, ~pfreq)};
+		if ((~playboth.value == 1) || (~recboth.value == 1) || (~lastplayed == "playboth") || (~lastplayed == "recboth") && (~flipp.value == 0))
+			{~pfreq = (~bP*(~detune2)*~basefreq)+~basefreq; ~numbox3.string = ~pfreq; c.set(\freq1, ~pfreq, \freq2, ~pfreq)};
+		if ((~playboth.value == 1) || (~recboth.value == 1) || (~lastplayed == "playboth") || (~lastplayed == "recboth") && (~flipp.value == 1))
+			{~pfreq = (~basefreq - ((~bP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; ~numbox3.string = ~pfreq; c.set(\freq1, ~pfreq, \freq2, ~pfreq)};
+		if ((~playright.value == 1) || (~recright.value == 1) || (~lastplayed == "playright") || (~lastplayed == "recright") && (~flipp.value == 0))
+			{~pfreq = (~rP*(~detune2)*~basefreq)+~basefreq; ~numbox3.string = ~pfreq; c.set(\freq2, ~pfreq)};
+		if ((~playright.value == 1) || (~recright.value == 1) || (~lastplayed == "playright") || (~lastplayed == "recright") && (~flipp.value == 1))
+			{~pfreq = (~basefreq - ((~rP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; ~numbox3.string = ~pfreq; c.set(\freq2, ~pfreq)};
+		if ((~playworst.value == 1) || (~recworst.value == 1) || (~lastplayed == "playworst") || (~lastplayed == "recworst") && (~thewrst == "left") && (~flipp.value == 0))
+			{~pfreq = (~lP*(~detune2)*~basefreq)+~basefreq; ~numbox3.string = ~pfreq; c.set(\freq1, ~pfreq, \freq2, ~pfreq)};
+		if ((~playworst.value == 1) || (~recworst.value == 1) || (~lastplayed == "playworst") || (~lastplayed == "recworst") && (~thewrst == "left") && (~flipp.value == 1))
+			{~pfreq = (~basefreq - ((~lP*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; ~numbox3.string = ~pfreq; c.set(\freq1, ~pfreq, \freq2, ~pfreq)};
+		if ((~playworst.value == 1) || (~recworst.value == 1) || (~lastplayed == "playworst") || (~lastplayed == "recworst") && (~thewrst == "both") && (~flipp.value == 0))
+			{~pfreq = (~bP*(~detune2)*~basefreq)+~basefreq; ~numbox3.string = ~pfreq; c.set(\freq1, ~pfreq, \freq2, ~pfreq)};
+		if ((~playworst.value == 1) || (~recworst.value == 1) || (~lastplayed == "playworst") || (~lastplayed == "recworst") && (~thewrst == "both") && (~flipp.value == 1))
+			{~pfreq = (~basefreq - ((~bF*(~detune2)*~basefreq)+~basefreq)) + ~basefreq; ~numbox3.string = ~pfreq; c.set(\freq1, ~pfreq, \freq2, ~pfreq)};
+		if ((~playworst.value == 1) || (~recworst.value == 1) || (~lastplayed == "playworst") || (~lastplayed == "recworst") && (~thewrst == "right") && (~flipp.value == 0))
+			{~pfreq = (~rP*(~detune2)*~basefreq)+~basefreq; ~numbox3.string = ~pfreq; c.set(\freq1, ~pfreq, \freq2, ~pfreq)};
+		if ((~playworst.value == 1) || (~recworst.value == 1) || (~lastplayed == "playworst") || (~lastplayed == "recworst") && (~thewrst == "right") && (~flipp.value == 1))
+			{~pfreq = (~basefreq - ((~rP*(~detune1)*~basefreq)+~basefreq)) + ~basefreq; ~numbox3.string = ~pfreq; c.set(\freq1, ~pfreq, \freq2, ~pfreq)};
+		if ((~whatson == [0,0,0,0,0,0,0,0]) && (~lastplayed.isNil))
+			{~pfreq = ~numbox3.string; ~pfreq = (~bP*(~detune2)*~basefreq)+~basefreq; ~numbox3.string = ~pfreq; c.set(\freq1, ~pfreq, \freq2, ~pfreq)};
+	});
+~dbox2 = SCNumberBox(~window, Rect(20, 20, 90, 20)).stringColor_(Color.yellow).background_(Color.new255(0, 0, 139));
+~dbox2.string = ~detune2;
+
+// OSCILLATORS
+SCStaticText(~window, Rect(130, 60, 63, 20)).string_("Oscillators:").stringColor_(Color.black);
+SCStaticText(~window, Rect(130, 60, 60, 20)).string_("Frontal:").stringColor_(Color.black);
+~menuF=SCPopUpMenu(~window,Rect(10,10,70,20))
+				.stringColor_(Color.yellow)
+				.background_(Color.new255(0, 0, 139))
+				.items_([ "Tri", "Sine" , "Saw" , "Square", "Off"])
+				.action_(
+					{arg synthType; 
+						synthType = synthType.value;
+						a.free;
+						a = case
+						{ synthType == 0 } { Synth.new(\Tri, [freq1:~ffreq,freq2:~ffreq,amp1:~aAmp1,amp2:~aAmp2]).run(~aPlaying); }
+ 						{ synthType == 1 } { Synth.new(\Sine, [freq1:~ffreq,freq2:~ffreq,amp1:~aAmp1,amp2:~aAmp2]).run(~aPlaying); }
+ 						{ synthType == 2  } { Synth.new(\Saw, [freq1:~ffreq,freq2:~ffreq,amp1:~aAmp1,amp2:~aAmp2]).run(~aPlaying); }
+						{ synthType == 3  } { Synth.new(\Square, [freq1:~ffreq,freq2:~ffreq,amp1:~aAmp1,amp2:~aAmp2]).run(~aPlaying); }
+						{ synthType == 4  } { Synth.new(\Tri, [freq1:~ffreq,freq2:~ffreq,amp1:0,amp2:0]).run(~aPlaying); };
+					};
+				);
+				
+SCStaticText(~window, Rect(130, 60, 80, 20)).string_("Motor Cortex:").stringColor_(Color.black);
+~menuMC=SCPopUpMenu(~window,Rect(10,10,70,20))
+				.stringColor_(Color.yellow)
+				.background_(Color.new255(0, 0, 139))
+				.items_([ "Tri", "Sine" , "Saw" , "Square", "Off"])
+				.action_(
+					{arg synthType; 
+						synthType = synthType.value;
+						b.free;
+						b = case
+						{ synthType == 0 } { Synth.new(\Tri, [freq1:~basefreq,freq2:~basefreq,amp1:~aAmp1,amp2:~aAmp2]).run(~bPlaying); }
+ 						{ synthType == 1 } { Synth.new(\Sine, [freq1:~basefreq,freq2:~basefreq,amp1:~aAmp1,amp2:~aAmp2]).run(~bPlaying); }
+ 						{ synthType == 2  } { Synth.new(\Saw, [freq1:~basefreq,freq2:~basefreq,amp1:~aAmp1,amp2:~aAmp2]).run(~bPlaying); }
+						{ synthType == 3  } { Synth.new(\Square, [freq1:~basefreq,freq2:~basefreq,amp1:~aAmp1,amp2:~aAmp2]).run(~bPlaying); }
+							{ synthType == 4  } { Synth.new(\Tri, [freq1:~basefreq,freq2:~basefreq,amp1:0,amp2:0]).run(~bPlaying); };
+					};
+				);
+				
+SCStaticText(~window, Rect(130, 60, 60, 20)).string_("Parietal:").stringColor_(Color.black);
+~menuP=SCPopUpMenu(~window,Rect(10,10,70,20))
+				.stringColor_(Color.yellow)
+				.background_(Color.new255(0, 0, 139))
+				.items_([ "Tri", "Sine" , "Saw" , "Square", "Off"])
+				.action_(
+					{arg synthType; 
+						synthType = synthType.value;
+						c.free;
+						c = case
+						{ synthType == 0 } { Synth.new(\Tri, [freq1:~pfreq,freq2:~pfreq,amp1:~aAmp1,amp2:~aAmp2]).run(~cPlaying); }
+ 						{ synthType == 1 } { Synth.new(\Sine, [freq1:~pfreq,freq2:~pfreq,amp1:~aAmp1,amp2:~aAmp2]).run(~cPlaying); }
+ 						{ synthType == 2  } { Synth.new(\Saw, [freq1:~pfreq,freq2:~pfreq,amp1:~aAmp1,amp2:~aAmp2]).run(~cPlaying); }
+						{ synthType == 3  } { Synth.new(\Square, [freq1:~pfreq,freq2:~pfreq,amp1:~aAmp1,amp2:~aAmp2]).run(~cPlaying); }
+						{ synthType == 4  } { Synth.new(\Tri, [freq1:~pfreq,freq2:~pfreq,amp1:0,amp2:0]).run(~cPlaying); };
+					};
+				);
+
+// STEREO SPREAD BUTTON -  SEND FRONTAL LEFT, MOTOR CORTEX CENTER, PARIETAL RIGHT
+//SCStaticText(~window, Rect(130, 60, 100, 20)).string_("Stereo Spreader:").stringColor_(Color.black);
+//~spread = SCButton(~window, Rect(0, 0, 20, 20)).states_([["on", Color.black, Color.new255(199, 199, 199)],["off", Color.black, Color.red]])
+//				.action_(
+//					{ 
+//						a.set(\amp1, 0.2, \amp2, 0); 
+//						b.set(\amp1, 0.1, \amp2, 0.1);
+//						c.set(\amp1, 0, \amp2, 0.2);
+//					}
+//				);
+
+// CLOSING TIME
+~window.onClose_{ s.free; i.free; CmdPeriod.removeAll; };
 )
