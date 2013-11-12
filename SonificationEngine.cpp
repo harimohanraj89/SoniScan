@@ -667,7 +667,7 @@ void SonificationEngine::WriteFooter(std::ofstream &file)
     }
 }
 
-void SonificationEngine::WriteToLog(char* fileLine, float avL[], float avR[]) {
+void SonificationEngine::WriteToLog(char* fileLine, float avL[], float avR[], float sdL[], float sdR[]) {
 
     std::ofstream numLog;
     numLog.open(OUTPUT_PATH NUMBERS_LOG, std::ios::app);
@@ -677,11 +677,18 @@ void SonificationEngine::WriteToLog(char* fileLine, float avL[], float avR[]) {
     }
  
     for (int i=0; i<3; i++) {
-        numLog << ", " << MODE_ONE_FREQ * detuneFactor * (avL[i] - avL[1])/avL[1];
+        numLog << ", " << (avL[i] - avL[1])/avL[1];
     }
     for (int i=0; i<3; i++) {
-        numLog << ", " << MODE_ONE_FREQ * detuneFactor * (avR[i] - avR[1])/avR[1];
+        numLog << ", " << (avR[i] - avR[1])/avR[1];
     }
+    for (int i=0; i<3; i++) {
+        numLog << ", " << sdL[i];
+    }
+    for (int i=0; i<3; i++) {
+        numLog << ", " << sdR[i];
+    }
+
     numLog << "\n";
     numLog.close();
 }
@@ -777,6 +784,8 @@ void SonificationEngine::ModeOneSonify()
 
     float averageArrayL[3];
     float averageArrayR[3];
+    float stdDevArrayL[3];
+    float stdDevArrayR [3];
     int countArrayL [3];
     int countArrayR [3];
     float devL[3];
@@ -793,23 +802,51 @@ void SonificationEngine::ModeOneSonify()
         countArrayL[i] = 0;
         countArrayR[i] = 0;
     }
-    
-    for (int y=sliceHeightD; y <= sliceHeightU; y++) {
-        for (int x=sliceWidthL; x <= sliceWidthR; x++) {
-            localInstr = GetLobe(x,y);
-            if (localInstr != 0 && masterData[x][y][slice] > TRIM_THRESHOLD) {
-                localInstr = (localInstr-1)%3;
-                averageArrayL[localInstr] += masterData[x][y][slice];
-                countArrayL[localInstr]++;
-            }
 
-            localInstr = GetLobe(2*MIDLINE-x,y);
-            if (localInstr != 0 && masterData[x][y][slice] > TRIM_THRESHOLD) {
-                localInstr = (localInstr-1)%3;
-                averageArrayR[localInstr] += masterData[x][y][slice];
-                countArrayR[localInstr]++;
-            }
+    // Average
+    // ------------------
+    if (std::abs(slice - 0) > std::abs(slice-29)) {
 
+        for (int y=sliceHeightD; y <= sliceHeightU; y++) {
+            for (int x=sliceWidthL; x <= sliceWidthR; x++) {
+                localInstr = GetLobe(x,y);
+                if (localInstr != 0 && masterData[x][y][slice] > TRIM_THRESHOLD) {
+                    localInstr = (localInstr-1)%3;
+
+                    if (x < ORTHOGL_MIDLINE) {
+                        averageArrayL[localInstr] += masterData[x][y][slice];
+                        countArrayL[localInstr]++;    
+                    }
+                    else {
+                        averageArrayR[localInstr] += masterData[x][y][slice];
+                        countArrayR[localInstr]++;       
+                    }
+                }
+            }
+        }
+    }
+
+    else {
+
+        for (int y=sliceHeightD; y <= sliceHeightU; y++) {
+            for (int x=sliceWidthL; x <= sliceWidthR; x++) {
+                if (x < PERSPEC_MIDLINE) {
+                    localInstr = GetLobe(x,y);    
+                    if (localInstr != 0 && masterData[x][y][slice] > TRIM_THRESHOLD) {
+                        localInstr = (localInstr-1)%3;
+                        averageArrayL[localInstr] += masterData[x][y][slice];
+                        countArrayL[localInstr]++;
+                    }
+                }
+                else {
+                    localInstr = GetLobe(2*PERSPEC_MIDLINE-x,y);
+                    if (localInstr != 0 && masterData[x][y][slice] > TRIM_THRESHOLD) {
+                        localInstr = (localInstr-1)%3;
+                        averageArrayR[localInstr] += masterData[x][y][slice];
+                        countArrayR[localInstr]++;
+                    }    
+                }
+            }
         }
     }
 
@@ -817,6 +854,59 @@ void SonificationEngine::ModeOneSonify()
         averageArrayL[i] /= countArrayL[i];
         averageArrayR[i] /= countArrayR[i];
         std::cout << averageArrayL[i] << "\t" << averageArrayR[i] << "\n";
+    }
+
+    // Standard Deviation
+    // ------------------
+    if (std::abs(slice - 0) > std::abs(slice-29)) {
+
+        for (int y=sliceHeightD; y <= sliceHeightU; y++) {
+            for (int x=sliceWidthL; x <= sliceWidthR; x++) {
+                localInstr = GetLobe(x,y);
+                if (localInstr != 0 && masterData[x][y][slice] > TRIM_THRESHOLD) {
+                    localInstr = (localInstr-1)%3;
+
+                    if (x < ORTHOGL_MIDLINE) {
+                        stdDevArrayL[localInstr] += (masterData[x][y][slice]-averageArrayL[localInstr]) * (masterData[x][y][slice]-averageArrayL[localInstr]);
+                    }
+                    else {
+                        stdDevArrayR[localInstr] += (masterData[x][y][slice]-averageArrayR[localInstr]) * (masterData[x][y][slice]-averageArrayR[localInstr]);
+                    }
+                }
+            }
+        }
+    }
+
+    else {
+
+        for (int y=sliceHeightD; y <= sliceHeightU; y++) {
+            for (int x=sliceWidthL; x <= sliceWidthR; x++) {
+                if (x < PERSPEC_MIDLINE) {
+                    localInstr = GetLobe(x,y);    
+                    if (localInstr != 0 && masterData[x][y][slice] > TRIM_THRESHOLD) {
+                        localInstr = (localInstr-1)%3;
+                        stdDevArrayL[localInstr] += (masterData[x][y][slice]-averageArrayL[localInstr]) * (masterData[x][y][slice]-averageArrayL[localInstr]);
+                    }
+                }
+                else {
+                    localInstr = GetLobe(2*PERSPEC_MIDLINE-x,y);
+                    if (localInstr != 0 && masterData[x][y][slice] > TRIM_THRESHOLD) {
+                        localInstr = (localInstr-1)%3;
+                        stdDevArrayR[localInstr] += (masterData[x][y][slice]-averageArrayR[localInstr]) * (masterData[x][y][slice]-averageArrayR[localInstr]);
+                    }    
+                }
+            }
+        }
+    }
+
+    for (int i=0; i<3; i++) {
+        stdDevArrayL[i] = pow(stdDevArrayL[i]/countArrayL[i], 0.5);
+        stdDevArrayR[i] = pow(stdDevArrayR[i]/countArrayR[i], 0.5);
+        std::cout << stdDevArrayL[i] << "\t" << stdDevArrayR[i] << "\n";
+    }
+
+    for (int i=0; i<3; i++) {
+        std::cout << countArrayL[i] << "\t" << countArrayR[i] << "\n";
     }
 
     // -----------------------------
@@ -846,27 +936,16 @@ void SonificationEngine::ModeOneSonify()
         averageArrayR[1] = 1;
     }
 
-    if (std::abs(slice - 0) < std::abs(slice-29)) {
-
-    }
-    else {
-        averageArrayR[0] = averageArrayL[0];
-        averageArrayR[1] = averageArrayL[1];
-        averageArrayR[2] = averageArrayL[2];
-    }
-
     for (int i=0; i<3; i++) {
         devL[i] = (averageArrayL[i]-averageArrayL[1]) / averageArrayL[1];
         devR[i] = (averageArrayR[i]-averageArrayR[1]) / averageArrayR[1];
     }
 
     for (int i=0; i<3; i++) {
-        freqArrayL[i] = centerFreq * ( 1 - detuneFactor*devL[i]);
-        freqArrayR[i] = centerFreq * ( 1 - detuneFactor*devR[i]);
+        freqArrayL[i] = centerFreq * ( 1 + detuneFactor*devL[i]);
+        freqArrayR[i] = centerFreq * ( 1 + detuneFactor*devR[i]);
         std::cout << "Calculated freq " << i << " : " << freqArrayL[i] << "\t" << freqArrayR[i] << "\n";
     }
-
-    scoreFile << "~detune1 = " << detuneFactor << ";\n";
 
     scoreFile << "~bF = " << (devL[0]+devR[0])/2 << ";\n";
     scoreFile << "~bMC = " << (devL[1]+devR[1])/2 << ";\n";
@@ -884,7 +963,7 @@ void SonificationEngine::ModeOneSonify()
     
     WriteFooter(scoreFile);
     scoreFile.close();
-    WriteToLog(fileLine, averageArrayL, averageArrayR);
+    WriteToLog(fileLine, averageArrayL, averageArrayR, stdDevArrayL, stdDevArrayR);
     DisplayDiagnostics(fileLine, flagLine, commandLine, instrCount);
 }
 

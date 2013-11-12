@@ -56,30 +56,41 @@ int main(void)
     char batchFileName[MAX_SCORELINE_LENGTH];
     ofstream numLog;
 
-    strcpy(fileBase[0], "gen_AA01");
-    strcpy(fileBase[1], "nor_BB01");
-    strcpy(fileBase[2], "mil_JA01");
-    strcpy(fileBase[3], "gen_JN01");
-    strcpy(fileBase[4], "gen_LB01");
-    strcpy(fileBase[5], "mil_LS01");
-    strcpy(fileBase[6], "gen_ND01");
-    strcpy(fileBase[7], "gen_NR01");
-    strcpy(fileBase[8], "mil_SF01");
-    strcpy(fileBase[9], "mod_SG01");
-    strcpy(fileBase[10], "mil_DO01");
-    strcpy(fileBase[11], "mod_PM01");
-    strcpy(fileBase[12], "nor_DG01");
-    strcpy(fileBase[13], "nor_DG02");
-    strcpy(fileBase[14], "nor_KF01");
-    strcpy(fileBase[15], "nor_LF01");
-    strcpy(fileBase[16], "nor_RS01");
-    strcpy(fileBase[17], "sev_HB01");
-    strcpy(fileBase[18], "sev_RC01");
-    strcpy(fileBase[19], "nor_RF01");
-    strcpy(fileBase[20], "nor_YA01");
-    strcpy(fileBase[21], "sev_HB02");
+    strcpy(fileBase[0] , "nor_KF01");
+    strcpy(fileBase[1] , "nor_WS01");
+    strcpy(fileBase[2] , "nor_BB01");
+    strcpy(fileBase[3] , "nor_LF01");
+    strcpy(fileBase[4] , "nor_DG01");
+    strcpy(fileBase[5] , "nor_RF01");
+    strcpy(fileBase[6] , "nor_DG02");
+    strcpy(fileBase[7] , "nor_RS01");
+    strcpy(fileBase[8] , "nor_AA01");
+    strcpy(fileBase[9] , "nor_LB01");
+    strcpy(fileBase[10], "nor_YA01");
+    strcpy(fileBase[11], "mil_DK01");
+    strcpy(fileBase[12], "mil_ND02");
+    strcpy(fileBase[13], "mil_DO01");
+    strcpy(fileBase[14], "mil_RD01");
+    strcpy(fileBase[15], "mil_JA01");
+    strcpy(fileBase[16], "mil_SF01");
+    strcpy(fileBase[17], "mil_LS01");
+    strcpy(fileBase[18], "mil_MG01");
+    strcpy(fileBase[19], "mod_JN01");
+    strcpy(fileBase[20], "mod_PM01");
+    strcpy(fileBase[21], "mod_RB01");
+    strcpy(fileBase[22], "mod_CN01");
+    strcpy(fileBase[23], "mod_SG01");
+    strcpy(fileBase[24], "mod_HC01");
+    strcpy(fileBase[25], "sev_HB01");
+    strcpy(fileBase[26], "sev_NR01");
+    strcpy(fileBase[27], "sev_ND01");
+    strcpy(fileBase[28], "sev_MA01");
+    strcpy(fileBase[29], "sev_KD01");
+    strcpy(fileBase[30], "sev_RJ01");
+    strcpy(fileBase[31], "sev_HB02");
+    strcpy(fileBase[32], "sev_RC01");
 
-    int numBase = 22;
+    int numBase = 28;
     // ================================
     // TESTING GROUNDS
     // ================================

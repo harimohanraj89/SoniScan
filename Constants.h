@@ -135,6 +135,7 @@ typedef float sample;
 #define QX 111
 #define QY 147
 
-#define MIDLINE 321.5
+#define ORTHOGL_MIDLINE 43
+#define PERSPEC_MIDLINE 321.5
 #endif
 

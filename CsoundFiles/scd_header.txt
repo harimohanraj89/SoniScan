@@ -1,3 +1,4 @@
+
 /*
 HEADER 
 
@@ -9,7 +10,6 @@ right : [x,y,z] --> new variable names [~rF,~rMC,~rP]
 OUTPUT string of file name : ~output
 */
 
-// Next steps : radio button for stereo spread hasn't been implemented yet, cant input freq values yet into the frequency value boxes. Not an external program yet.
+// Next steps: Make it an external program.
 
 (
-
